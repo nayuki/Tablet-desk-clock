@@ -23,8 +23,7 @@ body > div {
 }
 
 #container {
-	font-family: sans-serif;
-	font-weight: bold;
+	font-family: "Swiss 721 BT", sans-serif;
 	font-size: 24pt;
 	font-kerning: none;
 	color: #FFFFFF;
@@ -32,8 +31,24 @@ body > div {
 
 #timeblock {
 	font-size: 100%;
+	font-weight: bold;
 }
 
 #dateblock {
 	font-size: 35%;
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "Swiss 721 BT";
+	src: url("swiss-721-bt-normal.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Swiss 721 BT";
+	src: url("swiss-721-bt-medium.ttf") format("truetype");
+	font-weight: bold;
+	font-style: normal;
 }
