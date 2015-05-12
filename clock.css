@@ -1,0 +1,9 @@
+html {
+	background: #000000;
+}
+
+#clocktext {
+	font-family: sans-serif;
+	font-weight: bold;
+	color: #FFFFFF;
+}
