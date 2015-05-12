@@ -22,10 +22,18 @@ body > div {
 	vertical-align: middle;
 }
 
-#clocktext {
+#container {
 	font-family: sans-serif;
 	font-weight: bold;
 	font-size: 24pt;
 	font-kerning: none;
 	color: #FFFFFF;
+}
+
+#timeblock {
+	font-size: 100%;
+}
+
+#dateblock {
+	font-size: 35%;
 }
