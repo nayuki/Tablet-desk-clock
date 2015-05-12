@@ -2,12 +2,11 @@
 
 
 var timeTextElem = document.getElementById("timetext");
-var dateTextElem = document.getElementById("datetext");
 var timeTextNode = document.createTextNode("");
 var dateTextNode = document.createTextNode("");
 timeTextElem.appendChild(timeTextNode);
-dateTextElem.appendChild(dateTextNode);
-var curFontSize = 24;  // Do not change
+document.getElementById("datetext").appendChild(dateTextNode);
+var curFontSize = 24;  // Do not change, must match initial size declared in CSS code
 var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
