@@ -3,14 +3,14 @@
 
 var timeTextNode = document.createTextNode("");
 var dateTextNode = document.createTextNode("");
-document.getElementById("timetext").appendChild(timeTextNode);
-document.getElementById("datetext").appendChild(dateTextNode);
+document.getElementById("timeblock").appendChild(timeTextNode);
+document.getElementById("dateblock").appendChild(dateTextNode);
 var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
 function updateClock() {
 	var d = new Date();
-	var s = (d.getHours  () < 10 ? "0" : "") + d.getHours  () + ":";
+	var s = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":";
 	s += (d.getMinutes() < 10 ? "0" : "") + d.getMinutes() + ":";
 	s += (d.getSeconds() < 10 ? "0" : "") + d.getSeconds();
 	timeTextNode.data = s;
