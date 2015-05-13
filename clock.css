@@ -23,8 +23,11 @@ body {
 }
 
 #clock > div {
+	display: table-row;
+}
+
+#clock > div > div {
 	display: table-cell;
-	text-align: center;
 	vertical-align: middle;
 }
 
@@ -39,9 +42,17 @@ body {
 	font-weight: normal;
 }
 
+#clock-time, #clock-date {
+	text-align: center;
+}
+
+#clock > div:nth-child(2) {
+	height: 0.1%;
+}
+
 #clock-weather {
-	margin-top: -2.0em;
-	margin-right: 1.0em;
+	padding-bottom: 0.2em;
+	padding-right: 0.8em;
 	text-align: right;
 }
 

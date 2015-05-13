@@ -28,7 +28,10 @@ MIME_TYPES = {"html":"application/xhtml+xml", "ttf":"application/x-font-ttf"}
 def weather():
 	global weather_cache
 	if weather_cache is None or time.time() > weather_cache[1]:
-		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Environment Canada - Ontario - Toronto
+		# Data provided by Environment Canada. Documentation:
+		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
+		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
+		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
 		expiration = 20 * 60  # In seconds
 		xmlstr = urllib2.urlopen(url=url, timeout=60).read()
 		root = xml.etree.ElementTree.fromstring(xmlstr)
@@ -40,7 +43,7 @@ def weather():
 	bottle.response.content_type = "application/json"
 	return weather_cache[0]
 
-weather_cache = None
+weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
 
 
 if __name__ == "__main__":
