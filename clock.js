@@ -30,3 +30,53 @@
 	
 	updateClock();
 })();
+
+
+/* Weather module */
+
+(function() {
+	var weatherTextNode = document.createTextNode("");
+	document.getElementById("clock-weather").appendChild(weatherTextNode);
+	
+	function updateWeather() {
+		var xhr = new XMLHttpRequest();
+		xhr.onload = function() {
+			var data = JSON.parse(xhr.response);
+			if (typeof data != "object")
+				weatherTextNode.data = "(Weather: Error)";
+			else {
+				var text = data["condition"] + "\u00A0\u00A0";
+				text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u00B0C";
+				weatherTextNode.data = text;
+			}
+			setNextWeatherUpdate();
+		};
+		xhr.onTimeout = function() {
+			weatherTextNode.data = "(Weather: Error)";
+			setNextWeatherUpdate();
+		}
+		xhr.open("GET", "/weather.json", true);
+		xhr.responseType = "text";
+		xhr.timeout = 60000;
+		xhr.send();
+	}
+	
+	function setNextWeatherUpdate() {
+		var now = new Date();
+		var next = new Date(now.getTime());
+		next.setMinutes(4);
+		next.setSeconds(0);
+		next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Deliberate jitter of 2 minutes
+		if (next.getTime() < now.getTime())
+			next.setHours(next.getHours() + 1);
+		var delay = next.getTime() - now.getTime();
+		if (delay <= 0)  // Shouldn't happen, but just in case
+			delay = 60 * 60 * 1000;
+		setTimeout(updateWeather, delay);
+	}
+	
+	updateWeather();
+	setTimeout(function() {
+		if (weatherTextNode.data == "")
+			weatherTextNode.data = "(Weather loading...)"; }, 3000);
+})();

@@ -39,6 +39,12 @@ body {
 	font-weight: normal;
 }
 
+#clock-weather {
+	margin-top: -2.0em;
+	margin-right: 1.0em;
+	text-align: right;
+}
+
 @font-face {
 	font-family: "Swiss 721 BT";
 	src: url("swiss-721-bt-normal.ttf") format("truetype");
