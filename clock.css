@@ -5,6 +5,7 @@ html {
 	background: #000000;
 	font-family: "Swiss 721 BT", sans-serif;
 	font-size: 40pt;
+	font-weight: 400;
 	line-height: 1.0;
 	color: #FFFFFF;
 }
@@ -33,13 +34,13 @@ body {
 
 #clock-time {
 	font-size: 570%;
-	font-weight: bold;
+	font-weight: 600;
 }
 
 #clock-date {
 	margin-top: 0.3em;
 	font-size: 190%;
-	font-weight: normal;
+	font-weight: 200;
 }
 
 #clock-time, #clock-date {
@@ -51,21 +52,19 @@ body {
 }
 
 #clock-weather {
-	padding-bottom: 0.2em;
-	padding-right: 0.8em;
+	padding-bottom: 0.4em;
+	padding-right: 1.2em;
 	text-align: right;
+	font-weight: 100;
+	font-size: 80%;
+	transform: scaleY(0.9);
 }
 
-@font-face {
-	font-family: "Swiss 721 BT";
-	src: url("swiss-721-bt-normal.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-}
 
-@font-face {
-	font-family: "Swiss 721 BT";
-	src: url("swiss-721-bt-medium.ttf") format("truetype");
-	font-weight: bold;
-	font-style: normal;
-}
+/* Font files */
+
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-thin.ttf"  ) format("truetype"); font-weight: 100; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-light.ttf" ) format("truetype"); font-weight: 200; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-normal.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-medium.ttf") format("truetype"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-bold.ttf"  ) format("truetype"); font-weight: 800; font-style: normal; }
