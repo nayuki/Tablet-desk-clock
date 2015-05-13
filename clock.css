@@ -5,6 +5,8 @@ html {
 	margin: 0;
 	padding: 0;
 	background: #000000;
+	font-size: 40pt;
+	line-height: 1.0;
 }
 
 body {
@@ -20,18 +22,18 @@ body {
 	text-align: center;
 	vertical-align: middle;
 	font-family: "Swiss 721 BT", sans-serif;
-	font-size: 24pt;  /* Do not change, just a dummy initial size, must match JavaScript code */
 	font-kerning: none;
 	color: #FFFFFF;
 }
 
 #timeblock {
-	font-size: 100%;
+	font-size: 570%;
 	font-weight: bold;
 }
 
 #dateblock {
-	font-size: 35%;
+	margin-top: 0.3em;
+	font-size: 190%;
 	font-weight: normal;
 }
 

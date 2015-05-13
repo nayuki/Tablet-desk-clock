@@ -1,12 +1,10 @@
 "use strict";
 
 
-var timeTextElem = document.getElementById("timetext");
 var timeTextNode = document.createTextNode("");
 var dateTextNode = document.createTextNode("");
-timeTextElem.appendChild(timeTextNode);
+document.getElementById("timetext").appendChild(timeTextNode);
 document.getElementById("datetext").appendChild(dateTextNode);
-var curFontSize = 24;  // Do not change, must match initial size declared in CSS code
 var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
@@ -25,17 +23,4 @@ function updateClock() {
 }
 
 
-function updateTextSize() {
-	var containerElem = document.getElementById("container");
-	var targetWidth = 0.9;  // Proportion of full screen width
-	for (var i = 0; i < 3; i++) {  // Iterate for better better convergence
-		var newFontSize = containerElem.offsetWidth * targetWidth / timeTextElem.offsetWidth * curFontSize;
-		containerElem.style.fontSize = newFontSize.toFixed(3) + "pt";
-		curFontSize = newFontSize;
-	}
-}
-
-
 updateClock();
-updateTextSize();
-window.addEventListener("resize", updateTextSize);
