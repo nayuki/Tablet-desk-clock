@@ -35,9 +35,20 @@ def weather():
 		expiration = 20 * 60  # In seconds
 		xmlstr = urllib2.urlopen(url=url, timeout=60).read()
 		root = xml.etree.ElementTree.fromstring(xmlstr)
+		sunrise = "?"
+		sunset = "?"
+		for elem in root.findall("./riseSet/dateTime"):
+			if elem.get("zone") != "UTC":
+				s = elem.findtext("./hour") + ":" + elem.findtext("./minute")
+				if elem.get("name") == "sunrise":
+					sunrise = s
+				elif elem.get("name") == "sunset":
+					sunset = s
 		result = {
 			"condition"  : root.findtext("./currentConditions/condition"),
 			"temperature": root.findtext("./currentConditions/temperature"),
+			"sunrise": sunrise,
+			"sunset" : sunset,
 		}
 		weather_cache = (json.dumps(result), time.time() + expiration)
 	bottle.response.content_type = "application/json"

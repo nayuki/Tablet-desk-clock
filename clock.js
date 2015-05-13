@@ -35,27 +35,32 @@
 /* Weather module */
 
 (function() {
-	var weatherTextNode = document.createTextNode("");
-	document.getElementById("clock-weather").appendChild(weatherTextNode);
+	var weatherTextNode    = document.createTextNode("");
+	var sunrisesetTextNode = document.createTextNode("");
+	document.getElementById("clock-weather"   ).appendChild(weatherTextNode);
+	document.getElementById("clock-sunriseset").appendChild(sunrisesetTextNode);
 	var weatherTextIsSet;
 	
 	function updateWeather() {
 		// Set delayed placeholder text
 		weatherTextIsSet = false;
 		setTimeout(function() {
-			if (!weatherTextIsSet)
-				weatherTextNode.data = "(Weather loading...)"; }, 3000);
+			if (!weatherTextIsSet) {
+				weatherTextNode.data = "(Weather loading...)";
+				sunrisesetTextNode.data = ""; }}, 3000);
 		
 		// Fire off AJAX request
 		var xhr = new XMLHttpRequest();
 		xhr.onload = function() {
 			var data = JSON.parse(xhr.response);
-			if (typeof data != "object")
+			if (typeof data != "object") {
 				weatherTextNode.data = "(Weather: Data error)";
-			else {
+				sunrisesetTextNode.data = "";
+			} else {
 				var text = data["condition"] + "\u00A0\u00A0";
 				text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u00B0C";
 				weatherTextNode.data = text;
+				sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
 			}
 			weatherTextIsSet = true;
 		};
