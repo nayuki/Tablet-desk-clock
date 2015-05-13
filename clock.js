@@ -4,10 +4,8 @@
 /* Date and time clock module */
 
 (function() {
-	var timeTextNode = document.createTextNode("");
-	var dateTextNode = document.createTextNode("");
-	document.getElementById("clock-time").appendChild(timeTextNode);
-	document.getElementById("clock-date").appendChild(dateTextNode);
+	var timeTextNode = getChildTextNode("clock-time");
+	var dateTextNode = getChildTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var prevDateText = "";
 	
@@ -35,10 +33,8 @@
 /* Weather module */
 
 (function() {
-	var weatherTextNode    = document.createTextNode("");
-	var sunrisesetTextNode = document.createTextNode("");
-	document.getElementById("clock-weather"   ).appendChild(weatherTextNode);
-	document.getElementById("clock-sunriseset").appendChild(sunrisesetTextNode);
+	var weatherTextNode    = getChildTextNode("clock-weather");
+	var sunrisesetTextNode = getChildTextNode("clock-sunriseset");
 	var weatherTextIsSet;
 	
 	function updateWeather() {
@@ -89,3 +85,17 @@
 	
 	updateWeather();
 })();
+
+
+/* Miscellaneous utilities */
+
+function getChildTextNode(elemId) {
+	var elem = document.getElementById(elemId);
+	if (elem.firstChild != null && elem.firstChild.nodeType == Node.TEXT_NODE)
+		return elem.firstChild;
+	else {
+		var result = document.createTextNode("");
+		elem.appendChild(result);
+		return result;
+	}
+}
