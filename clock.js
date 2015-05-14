@@ -46,28 +46,33 @@
 				sunrisesetTextNode.data = ""; }}, 3000);
 		
 		// Fire off AJAX request
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {
-			var data = JSON.parse(xhr.response);
-			if (typeof data != "object") {
-				weatherTextNode.data = "(Weather: Data error)";
-				sunrisesetTextNode.data = "";
-			} else {
-				var text = data["condition"] + "\u00A0\u00A0";
-				text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
-				weatherTextNode.data = text;
-				sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
+		function doWeatherRequest(retryCount) {
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				var data = JSON.parse(xhr.response);
+				if (typeof data != "object") {
+					weatherTextNode.data = "(Weather: Data error)";
+					sunrisesetTextNode.data = "";
+				} else {
+					var text = data["condition"] + "\u00A0\u00A0";
+					text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
+					weatherTextNode.data = text;
+					sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
+				}
+				weatherTextIsSet = true;
+			};
+			xhr.ontimeout = function() {
+				weatherTextNode.data = "(Weather: Timeout)";
+				weatherTextIsSet = true;
+				if (retryCount < 10)
+					setTimeout(function() { doWeatherRequest(retryCount + 1); }, retryCount * 1000);
 			}
-			weatherTextIsSet = true;
-		};
-		xhr.ontimeout = function() {
-			weatherTextNode.data = "(Weather: Timeout)";
-			weatherTextIsSet = true;
+			xhr.open("GET", "/weather.json", true);
+			xhr.responseType = "text";
+			xhr.timeout = 10000;
+			xhr.send();
 		}
-		xhr.open("GET", "/weather.json", true);
-		xhr.responseType = "text";
-		xhr.timeout = 10000;
-		xhr.send();
+		doWeatherRequest(0);
 		
 		// Schedule next update at about 5 minutes past the hour
 		var now = new Date();
