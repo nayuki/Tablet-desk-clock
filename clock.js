@@ -15,9 +15,9 @@
 		s += (d.getMinutes() < 10 ? "0" : "") + d.getMinutes() + ":";
 		s += (d.getSeconds() < 10 ? "0" : "") + d.getSeconds();
 		timeTextNode.data = s;
-		s = d.getFullYear() + "-";
-		s += (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + "-";
-		s += (d.getDate() < 10 ? "0" : "") + d.getDate() + "-";
+		s = d.getFullYear() + "\u2013";
+		s += (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + "\u2013";
+		s += (d.getDate() < 10 ? "0" : "") + d.getDate() + "\u2013";
 		s += DAYS_OF_WEEK[d.getDay()];
 		if (prevDateText != s) {
 			dateTextNode.data = s;
@@ -54,7 +54,7 @@
 				sunrisesetTextNode.data = "";
 			} else {
 				var text = data["condition"] + "\u00A0\u00A0";
-				text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u00B0C";
+				text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
 				weatherTextNode.data = text;
 				sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
 			}
