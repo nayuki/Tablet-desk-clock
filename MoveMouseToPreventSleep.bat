@@ -1,0 +1,2 @@
+javaw MoveMouseToPreventSleep
+pause
