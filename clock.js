@@ -35,8 +35,9 @@
 /* Weather module */
 
 (function() {
-	var weatherTextNode    = getChildTextNode("clock-weather");
-	var sunrisesetTextNode = getChildTextNode("clock-sunriseset");
+	var sunrisesetTextNode  = getChildTextNode("clock-sunriseset");
+	var conditionTextNode   = getChildTextNode("clock-weather-condition");
+	var temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
 	
 	function updateWeather() {
@@ -44,8 +45,9 @@
 		weatherTextIsSet = false;
 		setTimeout(function() {
 			if (!weatherTextIsSet) {
-				weatherTextNode.data = "(Weather loading...)";
-				sunrisesetTextNode.data = ""; }}, 3000);
+				sunrisesetTextNode.data = "";
+				temperatureTextNode.data = "";
+				conditionTextNode.data = "(Weather loading...)"; }}, 3000);
 		
 		// Fire off AJAX request
 		function doWeatherRequest(retryCount) {
@@ -53,18 +55,20 @@
 			xhr.onload = function() {
 				var data = JSON.parse(xhr.response);
 				if (typeof data != "object") {
-					weatherTextNode.data = "(Weather: Data error)";
 					sunrisesetTextNode.data = "";
+					temperatureTextNode.data = "";
+					conditionTextNode.data = "(Weather: Data error)";
 				} else {
-					var text = data["condition"] + "\u00A0\u00A0";
-					text += Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
-					weatherTextNode.data = text;
 					sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
+					conditionTextNode.data = data["condition"];
+					temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
 				}
 				weatherTextIsSet = true;
 			};
 			xhr.ontimeout = function() {
-				weatherTextNode.data = "(Weather: Timeout)";
+				sunrisesetTextNode.data = "";
+				temperatureTextNode.data = "";
+				conditionTextNode.data = "(Weather: Timeout)";
 				weatherTextIsSet = true;
 				if (retryCount < 10)
 					setTimeout(function() { doWeatherRequest(retryCount + 1); }, retryCount * 1000);
