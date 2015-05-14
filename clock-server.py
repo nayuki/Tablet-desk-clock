@@ -1,6 +1,12 @@
-# For Python 2.x
+# For Python 2 and 3
 
-import bottle, json, time, urllib2, xml.etree.ElementTree
+import bottle, json, sys, time, xml.etree.ElementTree
+if sys.version_info.major == 2:
+    python_version = 2
+    import urllib2
+else:
+	python_version = 3
+	import urllib.request
 
 
 @bottle.route("/")
@@ -33,7 +39,7 @@ def weather():
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
 		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
 		expiration = 20 * 60  # In seconds
-		xmlstr = urllib2.urlopen(url=url, timeout=60).read()
+		xmlstr = (urllib.request if python_version == 3 else urllib2).urlopen(url=url, timeout=60).read()
 		root = xml.etree.ElementTree.fromstring(xmlstr)
 		sunrise = "?"
 		sunset = "?"
