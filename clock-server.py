@@ -1,4 +1,11 @@
-# For Python 2 and 3
+# 
+# Clock app web server
+# Run server with no arguments. For Python 2 and 3.
+# Client shall visit http://localhost:51367/
+# 
+
+
+# ---- Prelude ----
 
 import bottle, json, sys, time, xml.etree.ElementTree
 if sys.version_info.major == 2:
@@ -9,10 +16,11 @@ else:
 	import urllib.request
 
 
+# ---- Static file serving ----
+
 @bottle.route("/")
 def index():
 	bottle.redirect("clock.html", 301)
-
 
 @bottle.route("/<path:path>")
 def static_file(path):
@@ -29,6 +37,8 @@ def static_file(path):
 AUTHORIZED_STATIC_FILES = ["clock.css", "clock.html", "clock.js", "swiss-721-bt-bold.woff", "swiss-721-bt-light.woff", "swiss-721-bt-medium.woff", "swiss-721-bt-normal.woff", "swiss-721-bt-thin.woff"]
 MIME_TYPES = {"html":"application/xhtml+xml", "woff":"application/x-font-woff"}
 
+
+# ---- Weather module ----
 
 @bottle.route("/weather.json")
 def weather():
@@ -62,6 +72,8 @@ def weather():
 
 weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
 
+
+# ---- Server initialization ----
 
 if __name__ == "__main__":
 	bottle.run(host="localhost", port=51367, reloader=True)
