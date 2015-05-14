@@ -58,6 +58,7 @@ def weather():
 		}
 		weather_cache = (json.dumps(result), time.time() + expiration)
 	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
 	return weather_cache[0]
 
 weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
