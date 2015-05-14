@@ -38,7 +38,6 @@ def weather():
 		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
 		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
-		expiration = 20 * 60  # In seconds
 		xmlstr = (urllib.request if python_version == 3 else urllib2).urlopen(url=url, timeout=60).read()
 		root = xml.etree.ElementTree.fromstring(xmlstr)
 		sunrise = "?"
@@ -56,7 +55,7 @@ def weather():
 			"sunrise": sunrise,
 			"sunset" : sunset,
 		}
-		weather_cache = (json.dumps(result), time.time() + expiration)
+		weather_cache = (json.dumps(result), (time.time() + 3 * 60) // 3600 * 3600 - 3 * 60)  # Expires at 3 minutes past the hour
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	return weather_cache[0]
