@@ -35,21 +35,27 @@ body {
 #clock-timebox > div {
 	display: table-cell;
 	vertical-align: middle;
+	text-align: center;
+}
+
+#clock-time-wrapper {
+	font-weight: 600;
+	color: #A0A0A0;
 }
 
 #clock-time {
 	font-size: 570%;
-	font-weight: 600;
+}
+
+#clock-seconds {
+	padding-left: 0.2em;
+	font-size: 320%;
 }
 
 #clock-date {
 	margin-top: 0.3em;
 	font-size: 190%;
 	font-weight: 200;
-}
-
-#clock-time, #clock-date {
-	text-align: center;
 }
 
 #clock-weatherbox {

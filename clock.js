@@ -5,6 +5,7 @@
 
 (function() {
 	var timeTextNode = getChildTextNode("clock-time");
+	var secondsTextNode = getChildTextNode("clock-seconds");
 	var dateTextNode = getChildTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var prevDateText = "";
@@ -12,9 +13,10 @@
 	function updateClock() {
 		var d = new Date();
 		var s = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":";
-		s += (d.getMinutes() < 10 ? "0" : "") + d.getMinutes() + ":";
-		s += (d.getSeconds() < 10 ? "0" : "") + d.getSeconds();
+		s += (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
 		timeTextNode.data = s;
+		s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds();
+		secondsTextNode.data = s;
 		s = d.getFullYear() + "\u2013";
 		s += (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + "\u2013";
 		s += (d.getDate() < 10 ? "0" : "") + d.getDate() + "\u2013";
