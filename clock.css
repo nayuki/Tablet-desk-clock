@@ -38,7 +38,8 @@ html {
 }
 
 #clock-time-wrapper {
-	font-weight: 600;
+	font-family: "Swiss 721 BT Rounded", "Swiss 721 BT", sans-serif;
+	font-weight: 800;
 	color: #A0A0A0;
 }
 
@@ -53,8 +54,8 @@ html {
 
 #clock-date {
 	margin-top: 0.3em;
-	font-size: 190%;
-	font-weight: 200;
+	font-size: 170%;
+	font-weight: 400;
 }
 
 #clock-weatherbox {
@@ -142,3 +143,4 @@ html {
 @font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-normal.ttf") format("truetype"); font-weight: 400; font-style: normal; }
 @font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-medium.ttf") format("truetype"); font-weight: 600; font-style: normal; }
 @font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-bold.ttf"  ) format("truetype"); font-weight: 800; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT Rounded"; src: url("swiss-721-bt-bold-round.ttf") format("truetype"); font-weight: 800; font-style: normal; }
