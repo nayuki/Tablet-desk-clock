@@ -9,16 +9,21 @@
 	var dateTextNode    = getChildTextNode("clock-date");
 	var utcTextNode     = getChildTextNode("clock-utc");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-	var prevDateText = "";
-	var prevUtcText  = "";
+	var prevMinuteText = "";
+	var prevDateText   = "";
+	var prevUtcText    = "";
 	
 	function updateClock() {
 		var d = new Date();
 		// Local time: "14:32:19"
-		timeTextNode.data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
+		var s = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
+		if (s != prevMinuteText) {
+			timeTextNode.data = s;
+			prevMinuteText = s;
+		}
 		secondsTextNode.data = twoDigits(d.getSeconds());
 		// Local date: "2015-05-15-Fri"
-		var s = d.getFullYear() + "\u2013" + twoDigits(d.getMonth() + 1) + "\u2013" + twoDigits(d.getDate()) + "\u2013" + DAYS_OF_WEEK[d.getDay()];
+		s = d.getFullYear() + "\u2013" + twoDigits(d.getMonth() + 1) + "\u2013" + twoDigits(d.getDate()) + "\u2013" + DAYS_OF_WEEK[d.getDay()];
 		if (s != prevDateText) {
 			dateTextNode.data = s;
 			prevDateText = s;
