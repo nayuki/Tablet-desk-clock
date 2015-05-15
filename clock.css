@@ -76,6 +76,13 @@ html {
 	padding-bottom: 0.8em;
 }
 
+#clock-utc {
+	padding-left: 0.8em;
+	padding-bottom: 0.533em;
+	text-align: left;
+	font-size: 150%;
+}
+
 #clock-weather {
 	padding-right: 1.2em;
 	text-align: right;

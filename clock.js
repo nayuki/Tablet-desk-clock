@@ -7,7 +7,9 @@
 	var timeTextNode = getChildTextNode("clock-time");
 	var secondsTextNode = getChildTextNode("clock-seconds");
 	var dateTextNode = getChildTextNode("clock-date");
+	var utcTextNode = getChildTextNode("clock-utc");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	var prevUtcText = "";
 	var prevDateText = "";
 	
 	function updateClock() {
@@ -24,6 +26,14 @@
 		if (prevDateText != s) {
 			dateTextNode.data = s;
 			prevDateText = s;
+		}
+		s = (d.getUTCDate() < 10 ? "0" : "") + d.getUTCDate() + "-";
+		s += DAYS_OF_WEEK[d.getUTCDay()] + "\u2002";
+		s += (d.getUTCHours() < 10 ? "0" : "") + d.getUTCHours() + ":";
+		s += (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + "\u2002UTC";
+		if (prevUtcText != s) {
+			utcTextNode.data = s;
+			prevUtcText = s;
 		}
 		setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20);
 	}
