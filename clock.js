@@ -98,6 +98,79 @@
 })();
 
 
+/* Morning module */
+
+(function() {
+	var morningElem = document.getElementById("morning");
+	var greetingSpans = morningElem.getElementsByTagName("h1")[0].getElementsByTagName("span");
+	var remindersElem = document.getElementById("morning-reminders");
+	
+	function showMorning() {
+		var msgIndex = Math.floor(Math.random() * greetingSpans.length);
+		for (var i = 0; i < greetingSpans.length; i++)
+			greetingSpans[i].style.display = i == msgIndex ? "inline" : "none";
+		
+		function addMessage(text) {
+			var li = document.createElement("li");
+			li.appendChild(document.createTextNode(text));
+			remindersElem.appendChild(li);
+		}
+		
+		clearMessages();
+		
+		// Generate dummy text
+		var numMessages = Math.floor(Math.random() * 4);
+		if (numMessages == 0)
+			addMessage("(None)");
+		else {
+			for (var i = 0; i < numMessages; i++) {
+				var messageLen = Math.floor(Math.random() * 100);
+				var text = "";
+				for (var j = 0; j < messageLen; j++) {
+					if (Math.random() < 0.20)
+						text += " ";
+					else
+						text += String.fromCharCode(Math.floor(Math.random() * 26) + 97);
+				}
+				addMessage(text);
+			}
+		}
+		
+		morningElem.style.display = "block";
+		scheduleNextMorning();
+		setTimeout(hideMorning, 5 * 3600 * 1000);
+	}
+	
+	function hideMorning() {
+		morningElem.style.display = "none";
+		clearMessages();
+	}
+	
+	function clearMessages() {
+		while (remindersElem.firstChild != null)
+			remindersElem.removeChild(remindersElem.firstChild);
+	}
+	
+	function scheduleNextMorning() {
+		var now = new Date();
+		var next = new Date(now.getTime());
+		next.setHours(7);
+		next.setMinutes(0);
+		next.setSeconds(0);
+		next.setMilliseconds(0);
+		if (next.getTime() < now.getTime())
+			next.setDate(next.getDate() + 1);
+		var delay = next.getTime() - now.getTime();
+		if (delay <= 0)  // Shouldn't happen, but just in case
+			delay = 6 * 3600 * 1000;
+		setTimeout(showMorning, delay);
+	}
+	
+	morningElem.onclick = hideMorning;
+	scheduleNextMorning();
+})();
+
+
 /* Miscellaneous utilities */
 
 function getChildTextNode(elemId) {
