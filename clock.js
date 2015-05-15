@@ -35,7 +35,7 @@
 /* Weather module */
 
 (function() {
-	var sunrisesetTextNode  = getChildTextNode("clock-sunriseset");
+	var sunrisesetTextNode  = getChildTextNode("morning-sunriseset");  // Cross-module
 	var conditionTextNode   = getChildTextNode("clock-weather-condition");
 	var temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
@@ -114,7 +114,7 @@
 		addMessage("(Loading...)");
 		doMorningRequest(0);
 		
-		morningElem.style.display = "block";
+		morningElem.style.display = "table";
 		scheduleNextMorning();
 		setTimeout(hideMorning, 5 * 3600 * 1000);
 	}

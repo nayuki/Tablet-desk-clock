@@ -72,13 +72,8 @@ html {
 	vertical-align: bottom;
 }
 
-#clock-sunriseset, #clock-weather {
+#clock-weather {
 	padding-bottom: 0.8em;
-}
-
-#clock-sunriseset {
-	padding-left: 1.2em;
-	text-align: left;
 }
 
 #clock-weather {
@@ -101,10 +96,18 @@ html {
 	position: absolute;
 	box-sizing: padding-box;
 	width: 100%;
-	min-height: 100%;
+	height: 100%;
 	padding: 3% 6%;
 	background: #FFF4C0;
 	color: #000000;
+}
+
+#morning > div {
+	display: table-row;
+}
+
+#morning > div:first-child {
+	height: 100%;
 }
 
 #morning h1 {
@@ -133,6 +136,10 @@ html {
 #morning li {
 	margin: 0.5em 0em;
 	padding: 0em;
+}
+
+#morning-sunriseset {
+	text-align: center;
 }
 
 
