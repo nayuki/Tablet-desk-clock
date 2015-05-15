@@ -110,31 +110,9 @@
 		for (var i = 0; i < greetingSpans.length; i++)
 			greetingSpans[i].style.display = i == msgIndex ? "inline" : "none";
 		
-		function addMessage(text) {
-			var li = document.createElement("li");
-			li.appendChild(document.createTextNode(text));
-			remindersElem.appendChild(li);
-		}
-		
 		clearMessages();
-		
-		// Generate dummy text
-		var numMessages = Math.floor(Math.random() * 4);
-		if (numMessages == 0)
-			addMessage("(None)");
-		else {
-			for (var i = 0; i < numMessages; i++) {
-				var messageLen = Math.floor(Math.random() * 100);
-				var text = "";
-				for (var j = 0; j < messageLen; j++) {
-					if (Math.random() < 0.20)
-						text += " ";
-					else
-						text += String.fromCharCode(Math.floor(Math.random() * 26) + 97);
-				}
-				addMessage(text);
-			}
-		}
+		addMessage("(Loading...)");
+		doMorningRequest(0);
 		
 		morningElem.style.display = "block";
 		scheduleNextMorning();
@@ -146,9 +124,48 @@
 		clearMessages();
 	}
 	
+	function addMessage(text) {
+		var li = document.createElement("li");
+		li.appendChild(document.createTextNode(text));
+		remindersElem.appendChild(li);
+	}
+	
 	function clearMessages() {
 		while (remindersElem.firstChild != null)
 			remindersElem.removeChild(remindersElem.firstChild);
+	}
+	
+	function doMorningRequest(retryCount) {
+		var xhr = new XMLHttpRequest();
+		xhr.onload = function() {
+			var data = JSON.parse(xhr.response);
+			if (typeof data != "object") {
+				clearMessages();
+				addMessage("(Error)");
+			} else {
+				clearMessages();
+				var d = new Date();
+				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
+				if (key in data) {
+					var msgs = data[key];
+					if (msgs.length == 0)
+						addMessage("(None)");
+					else {
+						for (var i = 0; i < msgs.length; i++)
+							addMessage(msgs[i]);
+					}
+				} else
+					addMessage("(Data missing)");
+			}
+		};
+		xhr.ontimeout = function() {
+			if (retryCount < 10)
+				setTimeout(function() { doMorningRequest(retryCount + 1); }, retryCount * 1000);
+		}
+		xhr.open("GET", "/morning-reminders.json", true);
+		xhr.responseType = "text";
+		xhr.timeout = 10000;
+		xhr.send();
 	}
 	
 	function scheduleNextMorning() {

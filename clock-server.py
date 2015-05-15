@@ -7,7 +7,7 @@
 
 # ---- Prelude ----
 
-import bottle, json, sys, time, xml.etree.ElementTree
+import bottle, datetime, json, sys, time, xml.etree.ElementTree
 if sys.version_info.major == 2:
     python_version = 2
     import urllib2
@@ -73,7 +73,35 @@ def weather():
 weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
 
 
+# ---- Morning module ----
+
+@bottle.route("/morning-reminders.json", method=("GET","POST"))
+def morning_reminders():
+	if bottle.request.method == "GET":
+		today = datetime.date.today()
+		todelete = []
+		for key in morning_reminders:
+			d = datetime.date(int(key[0:4]), int(key[4:6]), int(key[6:8]))
+			if not (0 <= (d - today).days <= 1):
+				todelete.append(key)
+		for key in todelete:
+			del morning_reminders[key]
+		bottle.response.content_type = "application/json"
+		bottle.response.set_header("Cache-Control", "no-cache")
+		return json.dumps(morning_reminders)
+	elif bottle.request.method == "POST":
+		data = bottle.request.body.read()
+		if python_version == 3:
+			data = data.decode("UTF-8")
+		data = json.loads(data)
+		for key in data:
+			morning_reminders[key] = data[key]
+		return "Success"
+
+morning_reminders = {}
+
+
 # ---- Server initialization ----
 
 if __name__ == "__main__":
-	bottle.run(host="localhost", port=51367, reloader=True)
+	bottle.run(host="0.0.0.0", port=51367, reloader=True)
