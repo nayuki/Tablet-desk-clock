@@ -22,7 +22,7 @@ def main():
 		next = datetime.datetime(now.year, now.month, now.day, 10)
 		if next < now:
 			next += datetime.timedelta(days=1)
-		#time.sleep((next - now).total_seconds())
+		time.sleep((next - now).total_seconds())
 		
 		try:
 			run_once()
