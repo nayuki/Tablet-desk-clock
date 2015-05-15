@@ -139,8 +139,8 @@ html {
 
 /* Font files */
 
-@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-thin.woff"  ) format("woff"); font-weight: 100; font-style: normal; }
-@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-light.woff" ) format("woff"); font-weight: 200; font-style: normal; }
-@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-normal.woff") format("woff"); font-weight: 400; font-style: normal; }
-@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-medium.woff") format("woff"); font-weight: 600; font-style: normal; }
-@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-bold.woff"  ) format("woff"); font-weight: 800; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-thin.ttf"  ) format("truetype"); font-weight: 100; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-light.ttf" ) format("truetype"); font-weight: 200; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-normal.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-medium.ttf") format("truetype"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("swiss-721-bt-bold.ttf"  ) format("truetype"); font-weight: 800; font-style: normal; }
