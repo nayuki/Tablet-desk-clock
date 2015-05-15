@@ -98,14 +98,12 @@ html {
 #morning {
 	display: none;
 	position: absolute;
+	box-sizing: padding-box;
 	width: 100%;
 	min-height: 100%;
+	padding: 3% 6%;
 	background: #FFF4C0;
 	color: #000000;
-}
-
-#morning > div {
-	padding: 0.8em 1.5em;
 }
 
 #morning h1 {
