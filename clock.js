@@ -4,38 +4,38 @@
 /* Date and time clock module */
 
 (function() {
-	var timeTextNode = getChildTextNode("clock-time");
+	var timeTextNode    = getChildTextNode("clock-time");
 	var secondsTextNode = getChildTextNode("clock-seconds");
-	var dateTextNode = getChildTextNode("clock-date");
-	var utcTextNode = getChildTextNode("clock-utc");
+	var dateTextNode    = getChildTextNode("clock-date");
+	var utcTextNode     = getChildTextNode("clock-utc");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-	var prevUtcText = "";
 	var prevDateText = "";
+	var prevUtcText  = "";
 	
 	function updateClock() {
 		var d = new Date();
-		var s = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":";
-		s += (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
-		timeTextNode.data = s;
-		s = (d.getSeconds() < 10 ? "0" : "") + d.getSeconds();
-		secondsTextNode.data = s;
-		s = d.getFullYear() + "\u2013";
-		s += (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + "\u2013";
-		s += (d.getDate() < 10 ? "0" : "") + d.getDate() + "\u2013";
-		s += DAYS_OF_WEEK[d.getDay()];
-		if (prevDateText != s) {
+		// Local time: "14:32:19"
+		timeTextNode.data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
+		secondsTextNode.data = twoDigits(d.getSeconds());
+		// Local date: "2015-05-15-Fri"
+		var s = d.getFullYear() + "\u2013" + twoDigits(d.getMonth() + 1) + "\u2013" + twoDigits(d.getDate()) + "\u2013" + DAYS_OF_WEEK[d.getDay()];
+		if (s != prevDateText) {
 			dateTextNode.data = s;
 			prevDateText = s;
 		}
-		s = (d.getUTCDate() < 10 ? "0" : "") + d.getUTCDate() + "-";
-		s += DAYS_OF_WEEK[d.getUTCDay()] + "\u2002";
-		s += (d.getUTCHours() < 10 ? "0" : "") + d.getUTCHours() + ":";
-		s += (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + "\u2002UTC";
-		if (prevUtcText != s) {
+		// UTC date/time: "15-Fri 18:32 UTC"
+		s = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + "\u2002" + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + "\u2002UTC";
+		if (s != prevUtcText) {
 			utcTextNode.data = s;
 			prevUtcText = s;
 		}
 		setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20);
+	}
+	
+	function twoDigits(n) {
+		if (n < 0 || n >= 100 || Math.floor(n) != n)
+			throw "Integer expected";
+		return (n < 10 ? "0" : "") + n;
 	}
 	
 	updateClock();
