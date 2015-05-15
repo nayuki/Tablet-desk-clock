@@ -227,7 +227,3 @@ function getChildTextNode(elemId) {
 		return result;
 	}
 }
-
-
-// Accidental text selection on touchscreens is annoying
-document.onselectstart = function() { return false; }
