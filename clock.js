@@ -1,6 +1,18 @@
 "use strict";
 
 
+/* Shared definitions */
+
+// Useful Unicode characters
+var DEGREE_CHAR      = "\u00B0";
+var QUARTER_EM_SPACE = "\u2005";
+var EN_SPACE         = "\u2002";
+var EN_DASH          = "\u2013";
+var MINUS_CHAR       = "\u2212";
+var SUN_CHAR         = "\u263C";
+var MOON_CHAR        = "\u263D";
+
+
 /* Date and time clock module */
 
 (function() {
@@ -23,13 +35,13 @@
 		}
 		secondsTextNode.data = twoDigits(d.getSeconds());
 		// Local date: "2015-05-15-Fri"
-		s = d.getFullYear() + "\u2013" + twoDigits(d.getMonth() + 1) + "\u2013" + twoDigits(d.getDate()) + "\u2013" + DAYS_OF_WEEK[d.getDay()];
+		s = d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()];
 		if (s != prevDateText) {
 			dateTextNode.data = s;
 			prevDateText = s;
 		}
 		// UTC date/time: "15-Fri 18:32 UTC"
-		s = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + "\u2002" + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + "\u2002UTC";
+		s = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC";
 		if (s != prevUtcText) {
 			utcTextNode.data = s;
 			prevUtcText = s;
@@ -74,9 +86,9 @@
 					temperatureTextNode.data = "";
 					conditionTextNode.data = "(Weather: Data error)";
 				} else {
-					sunrisesetTextNode.data = "\u263C " + data["sunrise"] + " ~ " + data["sunset"] + " \u263D";
+					sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
 					conditionTextNode.data = data["condition"];
-					temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", "\u2212") + "\u2005\u00B0C";
+					temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
 				}
 				weatherTextIsSet = true;
 			};
