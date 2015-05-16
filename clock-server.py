@@ -7,7 +7,7 @@
 
 # ---- Prelude ----
 
-import bottle, datetime, json, sys, time, xml.etree.ElementTree
+import bottle, datetime, json, os, random, re, sys, time, xml.etree.ElementTree
 if sys.version_info.major == 2:
     python_version = 2
     import urllib2
@@ -31,11 +31,29 @@ def static_file(path):
 				mime = MIME_TYPES[ext]
 				break
 		return bottle.static_file(path, root=".", mimetype=mime)
+	elif re.match(r"wallpapers/[A-Za-z0-9_-]{1,80}\.(jpg|png)", path) is not None:
+		return bottle.static_file(path, root=".")
 	else:
 		bottle.abort(404)
 
 AUTHORIZED_STATIC_FILES = ["clock.css", "clock.html", "clock.js", "swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf"]
 MIME_TYPES = {"html":"application/xhtml+xml", "ttf":"application/x-font-ttf"}
+
+
+# ---- Clock module ----
+
+@bottle.route("/random-wallpaper.json")
+def wallpaper():
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	dir = "wallpapers"
+	if not os.path.isdir(dir):
+		return "null"
+	cond = lambda name: (os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png")))
+	items = list(filter(cond, os.listdir(dir)))
+	if len(items) == 0:
+		return "null"
+	return '"' + random.choice(items) + '"'
 
 
 # ---- Weather module ----

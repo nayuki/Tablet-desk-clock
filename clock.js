@@ -49,6 +49,43 @@ var MOON_CHAR        = "\u263D";
 		setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20);
 	}
 	
+	function updateWallpaper() {
+		// Fire off AJAX request
+		function doWallpaperRequest(retryCount) {
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				var data = JSON.parse(xhr.response);
+				if (typeof data == "string") {
+					var clockElem = document.getElementById("clock");
+					clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')"
+				}
+			};
+			xhr.ontimeout = function() {
+				if (retryCount < 10)
+					setTimeout(function() { doWallpaperRequest(retryCount + 1); }, retryCount * 1000);
+			}
+			xhr.open("GET", "/random-wallpaper.json", true);
+			xhr.responseType = "text";
+			xhr.timeout = 10000;
+			xhr.send();
+		}
+		doWallpaperRequest(0);
+		
+		// Schedule next update at 05:00 local time
+		var now = new Date();
+		var next = new Date(now.getTime());
+		next.setHours(5);
+		next.setMinutes(0);
+		next.setSeconds(0);
+		next.setMilliseconds(0);
+		if (next.getTime() < now.getTime())
+			next.setDate(next.getDate() + 1);
+		var delay = next.getTime() - now.getTime();
+		if (delay <= 0)  // Shouldn't happen, but just in case
+			delay = 24 * 60 * 60 * 1000;
+		setTimeout(updateWallpaper, delay);
+	}
+	
 	function twoDigits(n) {
 		if (n < 0 || n >= 100 || Math.floor(n) != n)
 			throw "Integer expected";
@@ -56,6 +93,7 @@ var MOON_CHAR        = "\u263D";
 	}
 	
 	updateClock();
+	updateWallpaper();
 })();
 
 

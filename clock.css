@@ -24,6 +24,8 @@ html {
 	position: absolute;
 	width: 100%;
 	height: 100%;
+	background-size: cover;
+	background-position: center;
 	font-kerning: none;
 }
 
@@ -42,6 +44,7 @@ html {
 	font-family: "Swiss 721 BT Rounded", "Swiss 721 BT", sans-serif;
 	font-weight: 800;
 	color: #A0A0A0;
+	text-shadow: 0.10em 0.10em 0.10em #202020;
 }
 
 #clock-time {
