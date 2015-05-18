@@ -151,7 +151,7 @@ var MOON_CHAR        = "\u263D";
 		next.setMinutes(4);
 		next.setSeconds(0);
 		next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Deliberate jitter of 2 minutes
-		if (next.getTime() < now.getTime())
+		if (next.getTime() < now.getTime() || next.getHours() == now.getHours() && now.getMinutes() >= 4)
 			next.setHours(next.getHours() + 1);
 		var delay = next.getTime() - now.getTime();
 		if (delay <= 0)  // Shouldn't happen, but just in case
