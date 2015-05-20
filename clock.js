@@ -24,9 +24,10 @@ var MOON_CHAR        = "\u263D";
 	var prevMinuteText = "";
 	var prevDateText   = "";
 	var prevUtcText    = "";
+	var timeOffset = 0;
 	
 	function updateClock() {
-		var d = new Date();
+		var d = new Date(Date.now() + timeOffset);
 		// Local time: "14:32:19"
 		var s = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
 		if (s != prevMinuteText) {
@@ -86,6 +87,27 @@ var MOON_CHAR        = "\u263D";
 		setTimeout(updateWallpaper, delay);
 	}
 	
+	function updateTimeOffset() {
+		// Fire off AJAX request
+		function doTimeRequest(retryCount) {
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				var data = JSON.parse(xhr.response);
+				if (typeof data == "number")
+					timeOffset = data - Date.now();
+			};
+			xhr.ontimeout = function() {
+				if (retryCount < 10)
+					setTimeout(function() { doTimeRequest(retryCount + 1); }, retryCount * 1000);
+			}
+			xhr.open("GET", "/time.json", true);
+			xhr.responseType = "text";
+			xhr.timeout = 1000;
+			xhr.send();
+		}
+		doTimeRequest(0);
+	}
+	
 	function twoDigits(n) {
 		if (n < 0 || n >= 100 || Math.floor(n) != n)
 			throw "Integer expected";
@@ -94,6 +116,7 @@ var MOON_CHAR        = "\u263D";
 	
 	updateClock();
 	updateWallpaper();
+	updateTimeOffset();
 })();
 
 

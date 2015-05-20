@@ -42,6 +42,13 @@ MIME_TYPES = {"html":"application/xhtml+xml", "ttf":"application/x-font-ttf"}
 
 # ---- Clock module ----
 
+@bottle.route("/time.json")
+def gettime():
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	return str(round(time.time() * 1000))
+
+
 @bottle.route("/random-wallpaper.json")
 def wallpaper():
 	bottle.response.content_type = "application/json"
