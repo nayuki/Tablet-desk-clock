@@ -79,7 +79,7 @@ var MOON_CHAR        = "\u263D";
 		next.setMinutes(0);
 		next.setSeconds(0);
 		next.setMilliseconds(0);
-		if (next.getTime() < now.getTime())
+		if (next.getTime() < now.getTime() + 60000)  // Compensate for possible early wake-up
 			next.setDate(next.getDate() + 1);
 		var delay = next.getTime() - now.getTime();
 		if (delay <= 0)  // Shouldn't happen, but just in case
@@ -263,7 +263,7 @@ var MOON_CHAR        = "\u263D";
 		next.setMinutes(0);
 		next.setSeconds(0);
 		next.setMilliseconds(0);
-		if (next.getTime() < now.getTime())
+		if (next.getTime() < now.getTime() + 60000)  // Compensate for possible early wake-up
 			next.setDate(next.getDate() + 1);
 		var delay = next.getTime() - now.getTime();
 		if (delay <= 0)  // Shouldn't happen, but just in case
