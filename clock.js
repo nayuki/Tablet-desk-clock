@@ -108,16 +108,29 @@ var MOON_CHAR        = "\u263D";
 		doTimeRequest(0);
 	}
 	
-	function twoDigits(n) {
-		if (n < 0 || n >= 100 || Math.floor(n) != n)
-			throw "Integer expected";
-		return (n < 10 ? "0" : "") + n;
-	}
-	
 	updateClock();
 	updateWallpaper();
 	updateTimeOffset();
 })();
+
+
+/* Admin module */
+
+function toggleAdmin() {
+	var elem = document.getElementById("admin-content");
+	elem.style.display = elem.style.display == "none" ? "block" : "none";
+}
+
+
+function reloadWeather() {
+	getChildTextNode("morning-sunriseset").data = "";
+	getChildTextNode("clock-weather-condition").data = "";
+	getChildTextNode("clock-weather-temperature").data = "(Weather loading...)";
+	doWeatherRequest(0);
+}
+
+
+var doWeatherRequest;
 
 
 /* Weather module */
@@ -138,7 +151,7 @@ var MOON_CHAR        = "\u263D";
 				conditionTextNode.data = "(Weather loading...)"; }}, 3000);
 		
 		// Fire off AJAX request
-		function doWeatherRequest(retryCount) {
+		doWeatherRequest = function(retryCount) {
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
 				var data = JSON.parse(xhr.response);
@@ -150,6 +163,8 @@ var MOON_CHAR        = "\u263D";
 					sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
 					conditionTextNode.data = data["condition"];
 					temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
+					var d = new Date();
+					getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
 				}
 				weatherTextIsSet = true;
 			};
@@ -287,4 +302,11 @@ function getChildTextNode(elemId) {
 		elem.appendChild(result);
 		return result;
 	}
+}
+	
+	
+function twoDigits(n) {
+	if (n < 0 || n >= 100 || Math.floor(n) != n)
+		throw "Integer expected";
+	return (n < 10 ? "0" : "") + n;
 }

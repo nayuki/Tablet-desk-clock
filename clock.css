@@ -100,6 +100,67 @@ html {
 }
 
 
+/* Admin module */
+
+#admin {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+#admin-content {
+	position: absolute;
+	box-sizing: padding-box;
+	width: 100%;
+	height: 100%;
+	padding: 1.5em;
+}
+
+#admin-content p {
+	margin-top: 1.0em;
+	margin-bottom: 1.0em;
+	font-size: 90%;
+}
+
+#admin-content a {
+	display: inline-block;
+	padding: 0.5em;
+	border-radius: 0.5em;
+	background-color: #F0F0F0;
+	color: inherit;
+	text-decoration: none;
+}
+
+#admin-content small {
+	font-size: 70%;
+}
+
+#admin-content > div {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	border: 1em solid transparent;
+	border-radius: 1em;
+	background-color: #FFFFFF;
+	color: #000000;
+}
+
+#admin-gear {
+	position: absolute;
+	box-sizing: padding-box;
+	width: 100%;
+	padding-top: 4em;
+	padding-right: 4em;
+	text-align: right;
+	font-size: 10%;
+	opacity: 0.7;
+}
+
+#admin-gear img {
+	width: 12em;
+}
+
+
 /* Morning module */
 
 #morning {
