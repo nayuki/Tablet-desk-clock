@@ -18,39 +18,20 @@ var MOON_CHAR        = "\u263D";
 var doRandomizeWallpaper;
 
 (function() {
-	var secondsTextNode = getChildTextNode("clock-seconds");
-	var timeTextNode    = getChildTextNode("clock-time");
-	var utcTextNode     = getChildTextNode("clock-utc");
-	var dateTextNode    = getChildTextNode("clock-date");
+	var secondsTextNode = new MemoizingTextNode("clock-seconds");
+	var timeTextNode    = new MemoizingTextNode("clock-time");
+	var utcTextNode     = new MemoizingTextNode("clock-utc");
+	var dateTextNode    = new MemoizingTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-	var prevMinuteText = "";
-	var prevDateText   = "";
 	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
 	function autoUpdateClockDisplay() {
 		var d = new Date(Date.now() + timeOffset);
-		
-		// This changes every second
-		secondsTextNode.data = twoDigits(d.getSeconds());
-		
-		// This changes every minute
-		var str = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());  // Local time: "14:32"
-		if (str != prevMinuteText) {  // Note: We assume that the offset between local time and UTC is an integer number of minutes
-			timeTextNode.data = str;
-			prevMinuteText = str;
-			
-			// UTC date/time: "15-Fri 18:32 UTC"
-			utcTextNode.data = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC";
-			
-			// This changes every day
-			str = d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()];  // Local date: "2015-05-15-Fri"
-			if (str != prevDateText) {
-				dateTextNode.data = str;
-				prevDateText = str;
-			}
-		}
-		
 		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
+		secondsTextNode.setText(twoDigits(d.getSeconds()));  // Local seconds: "19"
+		timeTextNode   .setText(twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes()));  // Local time: "14:32"
+		utcTextNode    .setText(twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");  // UTC date/time: "15-Fri 18:32 UTC"
+		dateTextNode   .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
 	}
 	
 	function autoUpdateWallpaper() {
@@ -110,6 +91,18 @@ var doRandomizeWallpaper;
 			xhr.send();
 		}
 		doTimeRequest(0);
+	}
+	
+	// A wrapper around a DOM text node to avoid pushing unnecessary value updates to the DOM.
+	function MemoizingTextNode(elemId) {
+		var textNode = getChildTextNode(elemId);
+		var value = textNode.data;
+		this.setText = function(str) {
+			if (str != value) {
+				textNode.data = str;
+				value = str;
+			}
+		};
 	}
 	
 	autoUpdateClockDisplay();
@@ -310,7 +303,7 @@ function getChildTextNode(elemId) {
 	
 	
 function twoDigits(n) {
-	if (n < 0 || n >= 100 || Math.floor(n) != n)
+	if (typeof n != "number" || n < 0 || n >= 100 || Math.floor(n) != n)
 		throw "Integer expected";
 	return (n < 10 ? "0" : "") + n;
 }
