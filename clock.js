@@ -18,38 +18,39 @@ var MOON_CHAR        = "\u263D";
 var doRandomizeWallpaper;
 
 (function() {
-	var timeTextNode    = getChildTextNode("clock-time");
 	var secondsTextNode = getChildTextNode("clock-seconds");
-	var dateTextNode    = getChildTextNode("clock-date");
+	var timeTextNode    = getChildTextNode("clock-time");
 	var utcTextNode     = getChildTextNode("clock-utc");
+	var dateTextNode    = getChildTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var prevMinuteText = "";
 	var prevDateText   = "";
-	var prevUtcText    = "";
-	var timeOffset = 0;
+	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
-	function updateClock() {
+	function updateClockDisplay() {
 		var d = new Date(Date.now() + timeOffset);
-		// Local time: "14:32:19"
-		var s = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
-		if (s != prevMinuteText) {
-			timeTextNode.data = s;
-			prevMinuteText = s;
-		}
+		
+		// This changes every second
 		secondsTextNode.data = twoDigits(d.getSeconds());
-		// Local date: "2015-05-15-Fri"
-		s = d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()];
-		if (s != prevDateText) {
-			dateTextNode.data = s;
-			prevDateText = s;
+		
+		// This changes every minute
+		var str = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());  // Local time: "14:32"
+		if (str != prevMinuteText) {  // Note: We assume that the offset between local time and UTC is an integer number of minutes
+			timeTextNode.data = str;
+			prevMinuteText = str;
+			
+			// UTC date/time: "15-Fri 18:32 UTC"
+			utcTextNode.data = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC";
+			
+			// This changes every day
+			str = d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()];  // Local date: "2015-05-15-Fri"
+			if (str != prevDateText) {
+				dateTextNode.data = str;
+				prevDateText = str;
+			}
 		}
-		// UTC date/time: "15-Fri 18:32 UTC"
-		s = twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC";
-		if (s != prevUtcText) {
-			utcTextNode.data = s;
-			prevUtcText = s;
-		}
-		setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20);
+		
+		setTimeout(updateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
 	}
 	
 	function updateWallpaper() {
@@ -111,7 +112,7 @@ var doRandomizeWallpaper;
 		doTimeRequest(0);
 	}
 	
-	updateClock();
+	updateClockDisplay();
 	updateWallpaper();
 	updateTimeOffset();
 })();
