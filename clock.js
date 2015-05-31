@@ -1,7 +1,7 @@
 "use strict";
 
 
-/* Shared definitions */
+/**** Shared constants and functions ****/
 
 // Useful Unicode characters
 var DEGREE_CHAR      = "\u00B0";
@@ -13,11 +13,30 @@ var SUN_CHAR         = "\u263C";
 var MOON_CHAR        = "\u263D";
 
 
-/* Date and time clock module */
+// Returns a text node that should be the only child of the given DOM element.
+// If the DOM element already has a text node child then it is returned; otherwise a new blank child is added and returned.
+// The element must not have sub-elements or multiple text nodes.
+function getChildTextNode(elemId) {
+	var elem = document.getElementById(elemId);
+	if (elem.firstChild == null || elem.firstChild.nodeType != Node.TEXT_NODE)
+		elem.insertBefore(document.createTextNode(""), elem.firstChild);
+	return elem.firstChild;
+}
 
-var doRandomizeWallpaper;
 
-(function() {
+// Returns the given integer as an exactly two-digit string.
+// e.g. twoDigits(0) -> "00", twoDigits(8) -> "08", twoDigits(52) -> "52".
+function twoDigits(n) {
+	if (typeof n != "number" || n < 0 || n >= 100 || Math.floor(n) != n)
+		throw "Integer expected";
+	return (n < 10 ? "0" : "") + n;
+}
+
+
+/**** Clock module ****/
+
+var clockModule = new function() {
+	// Private variables
 	var secondsTextNode = new MemoizingTextNode("clock-seconds");
 	var timeTextNode    = new MemoizingTextNode("clock-time");
 	var utcTextNode     = new MemoizingTextNode("clock-utc");
@@ -25,7 +44,7 @@ var doRandomizeWallpaper;
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
-	// Updates the date and time texts every second
+	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
 		var d = new Date(Date.now() + timeOffset);
 		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
@@ -35,8 +54,8 @@ var doRandomizeWallpaper;
 		dateTextNode   .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
 	}
 	
-	// Updates the clock wallpaper at startup and thereafter every day at 05:00
-	function autoUpdateWallpaper() {
+	// Updates the clock wallpaper once.
+	function randomizeWallpaper() {
 		// Fire off AJAX request
 		function doWallpaperRequest(retryCount) {
 			var xhr = new XMLHttpRequest();
@@ -57,7 +76,12 @@ var doRandomizeWallpaper;
 			xhr.send();
 		}
 		doWallpaperRequest(0);
-		doRandomizeWallpaper = function() { doWallpaperRequest(0); };
+	};
+	this.randomizeWallpaper = randomizeWallpaper;
+	
+	// Updates the clock wallpaper at startup and thereafter every day at 05:00.
+	function autoUpdateWallpaper() {
+		randomizeWallpaper();
 		
 		// Schedule next update at 05:00 local time
 		var now = new Date();
@@ -108,38 +132,71 @@ var doRandomizeWallpaper;
 		};
 	}
 	
+	// Initialization
 	autoUpdateClockDisplay();
 	autoUpdateWallpaper();
 	updateTimeOffset();
-})();
+};
 
 
-/* Admin module */
+/**** Admin module ****/
 
-function toggleAdmin() {
-	var elem = document.getElementById("admin-content");
-	elem.style.display = elem.style.display == "none" ? "block" : "none";
+var adminModule = new function() {
+	// Toggles whether the admin pane is shown or hidden.
+	this.togglePane = function() {
+		var elem = document.getElementById("admin-content");
+		elem.style.display = elem.style.display == "none" ? "block" : "none";
+	};
+	
+	this.reloadWeather = function() {
+		weatherModule.sunrisesetTextNode.data = "";
+		weatherModule.conditionTextNode.data = "";
+		weatherModule.temperatureTextNode.data = "(Weather loading...)";
+		weatherModule.doWeatherRequest(0);
+	};
 }
 
 
-function reloadWeather() {
-	getChildTextNode("morning-sunriseset").data = "";
-	getChildTextNode("clock-weather-condition").data = "";
-	getChildTextNode("clock-weather-temperature").data = "(Weather loading...)";
-	doWeatherRequest(0);
-}
+/**** Weather module ****/
 
-
-var doWeatherRequest;
-
-
-/* Weather module */
-
-(function() {
-	var sunrisesetTextNode  = getChildTextNode("morning-sunriseset");  // Cross-module
-	var conditionTextNode   = getChildTextNode("clock-weather-condition");
-	var temperatureTextNode = getChildTextNode("clock-weather-temperature");
+var weatherModule = new function() {
+	var sunrisesetTextNode  = this.sunrisesetTextNode  = getChildTextNode("morning-sunriseset");
+	var conditionTextNode   = this.conditionTextNode   = getChildTextNode("clock-weather-condition");
+	var temperatureTextNode = this.temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
+	
+	// Fires off an AJAX request.
+	function doWeatherRequest(retryCount) {
+		var xhr = new XMLHttpRequest();
+		xhr.onload = function() {
+			var data = JSON.parse(xhr.response);
+			if (typeof data != "object") {
+				sunrisesetTextNode.data = "";
+				temperatureTextNode.data = "";
+				conditionTextNode.data = "(Weather: Data error)";
+			} else {
+				sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
+				conditionTextNode.data = data["condition"];
+				temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
+				var d = new Date();
+				getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
+			}
+			weatherTextIsSet = true;
+		};
+		xhr.ontimeout = function() {
+			sunrisesetTextNode.data = "";
+			temperatureTextNode.data = "";
+			conditionTextNode.data = "(Weather: Timeout)";
+			weatherTextIsSet = true;
+			if (retryCount < 10)
+				setTimeout(function() { doWeatherRequest(retryCount + 1); }, retryCount * 1000);
+		}
+		xhr.open("GET", "/weather.json", true);
+		xhr.responseType = "text";
+		xhr.timeout = 10000;
+		xhr.send();
+	}
+	this.doWeatherRequest = doWeatherRequest;
 	
 	// Updates the weather and sunrise displays at startup and thereafter at around 4 minutes past each hour
 	function autoUpdateWeather() {
@@ -150,38 +207,6 @@ var doWeatherRequest;
 				sunrisesetTextNode.data = "";
 				temperatureTextNode.data = "";
 				conditionTextNode.data = "(Weather loading...)"; }}, 3000);
-		
-		// Fire off AJAX request
-		doWeatherRequest = function(retryCount) {
-			var xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				var data = JSON.parse(xhr.response);
-				if (typeof data != "object") {
-					sunrisesetTextNode.data = "";
-					temperatureTextNode.data = "";
-					conditionTextNode.data = "(Weather: Data error)";
-				} else {
-					sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
-					conditionTextNode.data = data["condition"];
-					temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
-					var d = new Date();
-					getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
-				}
-				weatherTextIsSet = true;
-			};
-			xhr.ontimeout = function() {
-				sunrisesetTextNode.data = "";
-				temperatureTextNode.data = "";
-				conditionTextNode.data = "(Weather: Timeout)";
-				weatherTextIsSet = true;
-				if (retryCount < 10)
-					setTimeout(function() { doWeatherRequest(retryCount + 1); }, retryCount * 1000);
-			}
-			xhr.open("GET", "/weather.json", true);
-			xhr.responseType = "text";
-			xhr.timeout = 10000;
-			xhr.send();
-		}
 		doWeatherRequest(0);
 		
 		// Schedule next update at about 5 minutes past the hour
@@ -198,13 +223,14 @@ var doWeatherRequest;
 		setTimeout(autoUpdateWeather, delay);
 	}
 	
+	// Initialization
 	autoUpdateWeather();
-})();
+};
 
 
-/* Morning module */
+/**** Morning module ****/
 
-(function() {
+var morningModule = new function() {
 	var morningElem = document.getElementById("morning");
 	var greetingSpans = morningElem.getElementsByTagName("h1")[0].getElementsByTagName("span");
 	var remindersElem = document.getElementById("morning-reminders");
@@ -288,28 +314,7 @@ var doWeatherRequest;
 		setTimeout(showMorning, delay);
 	}
 	
+	// Initialization
 	morningElem.onclick = hideMorning;
 	scheduleNextMorning();
-})();
-
-
-/* Miscellaneous utilities */
-
-// Returns a text node that should be the only child of the given DOM element.
-// If the DOM element already has a text node child then it is returned; otherwise a new blank child is added and returned.
-// The element must not have sub-elements or multiple text nodes.
-function getChildTextNode(elemId) {
-	var elem = document.getElementById(elemId);
-	if (elem.firstChild == null || elem.firstChild.nodeType != Node.TEXT_NODE)
-		elem.insertBefore(document.createTextNode(""), elem.firstChild);
-	return elem.firstChild;
-}
-
-
-// Returns the given integer as an exactly two-digit string.
-// e.g. twoDigits(0) -> "00", twoDigits(8) -> "08", twoDigits(52) -> "52".
-function twoDigits(n) {
-	if (typeof n != "number" || n < 0 || n >= 100 || Math.floor(n) != n)
-		throw "Integer expected";
-	return (n < 10 ? "0" : "") + n;
-}
+};

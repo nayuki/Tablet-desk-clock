@@ -164,7 +164,6 @@ html {
 /* Morning module */
 
 #morning {
-	display: none;
 	position: absolute;
 	box-sizing: padding-box;
 	width: 100%;
