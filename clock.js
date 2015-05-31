@@ -15,6 +15,8 @@ var MOON_CHAR        = "\u263D";
 
 /* Date and time clock module */
 
+var doRandomizeWallpaper;
+
 (function() {
 	var timeTextNode    = getChildTextNode("clock-time");
 	var secondsTextNode = getChildTextNode("clock-seconds");
@@ -71,6 +73,7 @@ var MOON_CHAR        = "\u263D";
 			xhr.send();
 		}
 		doWallpaperRequest(0);
+		doRandomizeWallpaper = function() { doWallpaperRequest(0); };
 		
 		// Schedule next update at 05:00 local time
 		var now = new Date();
