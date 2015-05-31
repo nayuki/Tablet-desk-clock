@@ -27,7 +27,7 @@ var doRandomizeWallpaper;
 	var prevDateText   = "";
 	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
-	function updateClockDisplay() {
+	function autoUpdateClockDisplay() {
 		var d = new Date(Date.now() + timeOffset);
 		
 		// This changes every second
@@ -50,10 +50,10 @@ var doRandomizeWallpaper;
 			}
 		}
 		
-		setTimeout(updateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
+		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
 	}
 	
-	function updateWallpaper() {
+	function autoUpdateWallpaper() {
 		// Fire off AJAX request
 		function doWallpaperRequest(retryCount) {
 			var xhr = new XMLHttpRequest();
@@ -88,7 +88,7 @@ var doRandomizeWallpaper;
 		var delay = next.getTime() - now.getTime();
 		if (delay <= 0)  // Shouldn't happen, but just in case
 			delay = 24 * 60 * 60 * 1000;
-		setTimeout(updateWallpaper, delay);
+		setTimeout(autoUpdateWallpaper, delay);
 	}
 	
 	function updateTimeOffset() {
@@ -112,8 +112,8 @@ var doRandomizeWallpaper;
 		doTimeRequest(0);
 	}
 	
-	updateClockDisplay();
-	updateWallpaper();
+	autoUpdateClockDisplay();
+	autoUpdateWallpaper();
 	updateTimeOffset();
 })();
 
@@ -145,7 +145,7 @@ var doWeatherRequest;
 	var temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
 	
-	function updateWeather() {
+	function autoUpdateWeather() {
 		// Set delayed placeholder text
 		weatherTextIsSet = false;
 		setTimeout(function() {
@@ -198,10 +198,10 @@ var doWeatherRequest;
 		var delay = next.getTime() - now.getTime();
 		if (delay <= 0)  // Shouldn't happen, but just in case
 			delay = 60 * 60 * 1000;
-		setTimeout(updateWeather, delay);
+		setTimeout(autoUpdateWeather, delay);
 	}
 	
-	updateWeather();
+	autoUpdateWeather();
 })();
 
 
