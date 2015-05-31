@@ -25,6 +25,7 @@ var doRandomizeWallpaper;
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
+	// Updates the date and time texts every second
 	function autoUpdateClockDisplay() {
 		var d = new Date(Date.now() + timeOffset);
 		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
@@ -34,6 +35,7 @@ var doRandomizeWallpaper;
 		dateTextNode   .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
 	}
 	
+	// Updates the clock wallpaper at startup and thereafter every day at 05:00
 	function autoUpdateWallpaper() {
 		// Fire off AJAX request
 		function doWallpaperRequest(retryCount) {
@@ -72,6 +74,7 @@ var doRandomizeWallpaper;
 		setTimeout(autoUpdateWallpaper, delay);
 	}
 	
+	// Updates the server-versus-client time offset at startup only
 	function updateTimeOffset() {
 		// Fire off AJAX request
 		function doTimeRequest(retryCount) {
@@ -138,6 +141,7 @@ var doWeatherRequest;
 	var temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
 	
+	// Updates the weather and sunrise displays at startup and thereafter at around 4 minutes past each hour
 	function autoUpdateWeather() {
 		// Set delayed placeholder text
 		weatherTextIsSet = false;
@@ -268,6 +272,7 @@ var doWeatherRequest;
 		xhr.send();
 	}
 	
+	// Shows the morning data every day at 07:00
 	function scheduleNextMorning() {
 		var now = new Date();
 		var next = new Date(now.getTime());
@@ -290,18 +295,19 @@ var doWeatherRequest;
 
 /* Miscellaneous utilities */
 
+// Returns a text node that should be the only child of the given DOM element.
+// If the DOM element already has a text node child then it is returned; otherwise a new blank child is added and returned.
+// The element must not have sub-elements or multiple text nodes.
 function getChildTextNode(elemId) {
 	var elem = document.getElementById(elemId);
-	if (elem.firstChild != null && elem.firstChild.nodeType == Node.TEXT_NODE)
-		return elem.firstChild;
-	else {
-		var result = document.createTextNode("");
-		elem.appendChild(result);
-		return result;
-	}
+	if (elem.firstChild == null || elem.firstChild.nodeType != Node.TEXT_NODE)
+		elem.insertBefore(document.createTextNode(""), elem.firstChild);
+	return elem.firstChild;
 }
-	
-	
+
+
+// Returns the given integer as an exactly two-digit string.
+// e.g. twoDigits(0) -> "00", twoDigits(8) -> "08", twoDigits(52) -> "52".
 function twoDigits(n) {
 	if (typeof n != "number" || n < 0 || n >= 100 || Math.floor(n) != n)
 		throw "Integer expected";
