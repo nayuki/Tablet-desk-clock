@@ -104,7 +104,7 @@ var clockModule = new function() {
 	}
 	
 	// Updates the clock wallpaper once.
-	function randomizeWallpaper() {
+	var randomizeWallpaper = this.randomizeWallpaper = function () {
 		getAndProcessJson("/random-wallpaper.json", 3000, 0, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
@@ -112,7 +112,6 @@ var clockModule = new function() {
 			}
 		});
 	};
-	this.randomizeWallpaper = randomizeWallpaper;
 	
 	// Updates the clock wallpaper at startup and thereafter every day at 05:00.
 	function autoUpdateWallpaper() {
@@ -170,8 +169,8 @@ var adminModule = new function() {
 	};
 	
 	this.reloadWeather = function() {
-		weatherModule.sunrisesetTextNode.data = "";
-		weatherModule.conditionTextNode.data = "";
+		weatherModule.sunrisesetTextNode .data = "";
+		weatherModule.conditionTextNode  .data = "";
 		weatherModule.temperatureTextNode.data = "(Weather loading...)";
 		weatherModule.doWeatherRequest();
 	};
@@ -187,7 +186,7 @@ var weatherModule = new function() {
 	var weatherTextIsSet;
 	
 	// Updates the weather display once.
-	function doWeatherRequest() {
+	var doWeatherRequest = this.doWeatherRequest = function() {
 		getAndProcessJson("/weather.json", 10000, 0, function(data) {
 			if (typeof data != "object") {
 				sunrisesetTextNode.data = "";
@@ -203,7 +202,6 @@ var weatherModule = new function() {
 			weatherTextIsSet = true;
 		});
 	}
-	this.doWeatherRequest = doWeatherRequest;
 	
 	// Updates the weather and sunrise displays at startup and thereafter at around 4 minutes past each hour
 	function autoUpdateWeather() {
