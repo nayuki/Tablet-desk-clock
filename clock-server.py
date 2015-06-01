@@ -99,7 +99,10 @@ def weather():
 			"sunrise": sunrise,
 			"sunset" : sunset,
 		}
-		weather_cache = (json.dumps(result), (time.time() + 3 * 60) // 3600 * 3600 - 3 * 60)  # Expires at 3 minutes past the hour
+		now = time.time()
+		expire = ((now - 3*60) // 3600 + 1) * 3600 + 3*60  # 3 minutes past the next hour
+		expire = min(now + 20 * 60, expire)  # Or 20 minutes, whichever is earlier
+		weather_cache = (json.dumps(result), expire)
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	return weather_cache[0]
