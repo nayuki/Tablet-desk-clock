@@ -36,6 +36,7 @@ def static_file(path):
 				mime = MIME_TYPES[ext]
 				break
 		return bottle.static_file(path, root=".", mimetype=mime)
+	# Wallpaper file names must be 1 to 80 characters of {A-Z, a-z, 0-9, hyphen, underscore}, with a .png or .jpg lowercase extension
 	elif re.match(r"wallpapers/[A-Za-z0-9_-]{1,80}\.(jpg|png)", path) is not None:
 		return bottle.static_file(path, root=".")
 	else:
@@ -51,6 +52,7 @@ MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"appl
 
 # ---- Clock module ----
 
+# Yields the current Unix millisecond time as a number, e.g.: 1433185355946
 @bottle.route("/time.json")
 def gettime():
 	bottle.response.content_type = "application/json"
@@ -58,15 +60,18 @@ def gettime():
 	return str(round(time.time() * 1000))
 
 
+# Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png"
 @bottle.route("/random-wallpaper.json")
 def wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	dir = "wallpapers"
 	if not os.path.isdir(dir):
-		return "null"
-	cond = lambda name: (os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png")))
-	items = list(filter(cond, os.listdir(dir)))
+		return "null"  # No quotes in the output
+	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))
+	items = filter(cond, os.listdir(dir))
+	if python_version == 3:
+		items = list(items)
 	if len(items) == 0:
 		return "null"
 	return '"' + random.choice(items) + '"'
@@ -74,6 +79,8 @@ def wallpaper():
 
 # ---- Weather module ----
 
+# Yields an object containing weather and sunrise data, e.g.:
+# {"condition":"Mostly Cloudy", "temperature":"-2.5", "sunrise":"07:30", "sunset":"18:42"}
 @bottle.route("/weather.json")
 def weather():
 	global weather_cache
@@ -82,23 +89,24 @@ def weather():
 		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
 		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
-		xmlstr = (urllib.request if python_version == 3 else urllib2).urlopen(url=url, timeout=60).read()
+		stream = (urllib.request if python_version == 3 else urllib2).urlopen(url=url, timeout=60)
+		xmlstr = stream.read()
+		stream.close()
+		
+		# Parse data and build result
 		root = xml.etree.ElementTree.fromstring(xmlstr)
-		sunrise = "?"
-		sunset = "?"
-		for elem in root.findall("./riseSet/dateTime"):
-			if elem.get("zone") != "UTC":
-				s = elem.findtext("./hour") + ":" + elem.findtext("./minute")
-				if elem.get("name") == "sunrise":
-					sunrise = s
-				elif elem.get("name") == "sunset":
-					sunset = s
 		result = {
 			"condition"  : root.findtext("./currentConditions/condition"),
 			"temperature": root.findtext("./currentConditions/temperature"),
-			"sunrise": sunrise,
-			"sunset" : sunset,
 		}
+		for elem in root.findall("./riseSet/dateTime"):
+			if elem.get("zone") != "UTC":
+				s = elem.findtext("./hour") + ":" + elem.findtext("./minute")
+				name = elem.get("name")
+				if name in ("sunrise", "sunset"):
+					result[name] = s
+		
+		# Expiration and caching
 		now = time.time()
 		expire = ((now - 3*60) // 3600 + 1) * 3600 + 3*60  # 3 minutes past the next hour
 		expire = min(now + 20 * 60, expire)  # Or 20 minutes, whichever is earlier
@@ -112,6 +120,8 @@ weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
 
 # ---- Morning module ----
 
+# Stores or yields an object containing morning reminders, e.g.:
+# {"20150531": ["Hello world", "Entry two"], "20150601": []}
 @bottle.route("/morning-reminders.json", method=("GET","POST"))
 def morning_reminders():
 	if bottle.request.method == "GET":
@@ -131,8 +141,7 @@ def morning_reminders():
 		if python_version == 3:
 			data = data.decode("UTF-8")
 		data = json.loads(data)
-		for key in data:
-			morning_reminders[key] = data[key]
+		morning_reminders.update(data)
 		return "Success"
 
 morning_reminders = {}
