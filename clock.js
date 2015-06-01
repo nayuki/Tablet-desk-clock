@@ -65,6 +65,23 @@ function scheduleCall(func, wake) {
 }
 
 
+// Performs an XHR on the given URL, and calls the given function with the parsed JSON data if data was successful obtained.
+function getAndProcessJson(url, timeout, retryCount, func) {
+	var xhr = new XMLHttpRequest();
+	xhr.onload = function() {
+		func(JSON.parse(xhr.response));
+	};
+	xhr.ontimeout = function() {
+		if (retryCount < 9)  // Exponential back-off
+			setTimeout(function() { getAndProcessJson(url, timeout, retryCount + 1, func); }, Math.pow(2, retryCount) * 1000);
+	};
+	xhr.open("GET", url, true);
+	xhr.responseType = "text";
+	xhr.timeout = timeout;
+	xhr.send();
+}
+
+
 /**** Clock module ****/
 
 var clockModule = new function() {
@@ -88,26 +105,12 @@ var clockModule = new function() {
 	
 	// Updates the clock wallpaper once.
 	function randomizeWallpaper() {
-		// Fire off AJAX request
-		function doWallpaperRequest(retryCount) {
-			var xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				var data = JSON.parse(xhr.response);
-				if (typeof data == "string") {
-					var clockElem = document.getElementById("clock");
-					clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')"
-				}
-			};
-			xhr.ontimeout = function() {
-				if (retryCount < 10)
-					setTimeout(function() { doWallpaperRequest(retryCount + 1); }, retryCount * 1000);
+		getAndProcessJson("/random-wallpaper.json", 3000, 0, function(data) {
+			if (typeof data == "string") {
+				var clockElem = document.getElementById("clock");
+				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')"
 			}
-			xhr.open("GET", "/random-wallpaper.json", true);
-			xhr.responseType = "text";
-			xhr.timeout = 10000;
-			xhr.send();
-		}
-		doWallpaperRequest(0);
+		});
 	};
 	this.randomizeWallpaper = randomizeWallpaper;
 	
@@ -129,27 +132,13 @@ var clockModule = new function() {
 	
 	// Updates the server-versus-client time offset at startup only
 	function updateTimeOffset() {
-		// Fire off AJAX request
-		function doTimeRequest(retryCount) {
-			var xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				var data = JSON.parse(xhr.response);
-				if (typeof data == "number") {
-					timeOffset = data - Date.now();
-					if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
-						timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
-				}
-			};
-			xhr.ontimeout = function() {
-				if (retryCount < 10)
-					setTimeout(function() { doTimeRequest(retryCount + 1); }, retryCount * 1000);
+		getAndProcessJson("/time.json", 1000, 0, function(data) {
+			if (typeof data == "number") {
+				timeOffset = data - Date.now();
+				if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
+					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
 			}
-			xhr.open("GET", "/time.json", true);
-			xhr.responseType = "text";
-			xhr.timeout = 1000;
-			xhr.send();
-		}
-		doTimeRequest(0);
+		});
 	}
 	
 	// A wrapper around a DOM text node to avoid pushing unnecessary value updates to the DOM.
@@ -184,7 +173,7 @@ var adminModule = new function() {
 		weatherModule.sunrisesetTextNode.data = "";
 		weatherModule.conditionTextNode.data = "";
 		weatherModule.temperatureTextNode.data = "(Weather loading...)";
-		weatherModule.doWeatherRequest(0);
+		weatherModule.doWeatherRequest();
 	};
 }
 
@@ -197,11 +186,9 @@ var weatherModule = new function() {
 	var temperatureTextNode = this.temperatureTextNode = getChildTextNode("clock-weather-temperature");
 	var weatherTextIsSet;
 	
-	// Fires off an AJAX request.
-	function doWeatherRequest(retryCount) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {
-			var data = JSON.parse(xhr.response);
+	// Updates the weather display once.
+	function doWeatherRequest() {
+		getAndProcessJson("/weather.json", 10000, 0, function(data) {
 			if (typeof data != "object") {
 				sunrisesetTextNode.data = "";
 				temperatureTextNode.data = "";
@@ -214,19 +201,7 @@ var weatherModule = new function() {
 				getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
 			}
 			weatherTextIsSet = true;
-		};
-		xhr.ontimeout = function() {
-			sunrisesetTextNode.data = "";
-			temperatureTextNode.data = "";
-			conditionTextNode.data = "(Weather: Timeout)";
-			weatherTextIsSet = true;
-			if (retryCount < 10)
-				setTimeout(function() { doWeatherRequest(retryCount + 1); }, retryCount * 1000);
-		}
-		xhr.open("GET", "/weather.json", true);
-		xhr.responseType = "text";
-		xhr.timeout = 10000;
-		xhr.send();
+		});
 	}
 	this.doWeatherRequest = doWeatherRequest;
 	
@@ -239,7 +214,7 @@ var weatherModule = new function() {
 				sunrisesetTextNode.data = "";
 				temperatureTextNode.data = "";
 				conditionTextNode.data = "(Weather loading...)"; }}, 3000);
-		doWeatherRequest(0);
+		doWeatherRequest();
 		
 		// Schedule next update at about 5 minutes past the hour
 		var now = getCorrectedDatetime();
@@ -271,7 +246,7 @@ var morningModule = new function() {
 		
 		clearMessages();
 		addMessage("(Loading...)");
-		doMorningRequest(0);
+		doMorningRequest();
 		
 		morningElem.style.display = "table";
 		scheduleNextMorning();
@@ -294,10 +269,8 @@ var morningModule = new function() {
 			remindersElem.removeChild(remindersElem.firstChild);
 	}
 	
-	function doMorningRequest(retryCount) {
-		var xhr = new XMLHttpRequest();
-		xhr.onload = function() {
-			var data = JSON.parse(xhr.response);
+	function doMorningRequest() {
+		getAndProcessJson("/morning-reminders.json", 3000, 0, function(data) {
 			if (typeof data != "object") {
 				clearMessages();
 				addMessage("(Error)");
@@ -316,15 +289,7 @@ var morningModule = new function() {
 				} else
 					addMessage("(Data missing)");
 			}
-		};
-		xhr.ontimeout = function() {
-			if (retryCount < 10)
-				setTimeout(function() { doMorningRequest(retryCount + 1); }, retryCount * 1000);
-		}
-		xhr.open("GET", "/morning-reminders.json", true);
-		xhr.responseType = "text";
-		xhr.timeout = 10000;
-		xhr.send();
+		});
 	}
 	
 	// Shows the morning data every day at 07:00
