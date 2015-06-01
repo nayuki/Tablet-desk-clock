@@ -41,7 +41,11 @@ def static_file(path):
 	else:
 		bottle.abort(404)
 
-AUTHORIZED_STATIC_FILES = ["clock.css", "clock.html", "clock.js", "gear-icon.svg", "reload-icon.svg", "swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf"]
+AUTHORIZED_STATIC_FILES = [
+	"clock.css", "clock.html", "clock.js",
+	"gear-icon.svg", "reload-icon.svg",
+	"swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf",
+]
 MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
 
 
