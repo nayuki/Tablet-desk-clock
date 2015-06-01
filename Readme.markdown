@@ -7,7 +7,14 @@ The web part of the software can run on {Firefox, Chrome, Safari, but not Intern
 
 Note: Viewing the static HTML file on disk will show the basic clock but not support functionality such as wallpaper randomization and network I/O. It is necessary to run the Python server to get all the features.
 
+
+## Instructions
+
+0. Ensure your system has Python 2.7 or 3.x installed.
+0. Open a command line and run: `python clock-server.py`
+0. Open a web browser and visit: http://localhost:51367/
+
 ---
 
-Home page: http://www.nayuki.io/page/tablet-desk-clock
+Home page: http://www.nayuki.io/page/tablet-desk-clock  
 Copyright © 2015 Project Nayuki. All rights reserved. No warranty.  
