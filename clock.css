@@ -13,16 +13,16 @@ html, body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	-moz-user-select: none;  /* Accidental text selection on touchscreens is annoying */
 }
 
 html {
 	background: #000000;
 	font-family: "Swiss 721 BT", sans-serif;
-	font-size: 4.2vw;
+	font-size: 4.2vw;  /* Base font size */
 	font-weight: 400;
 	line-height: 1.0;
 	color: #FFFFFF;
+	-moz-user-select: none;  /* Accidental text selection on touchscreens is annoying */
 }
 
 
@@ -35,7 +35,6 @@ html {
 	height: 100%;
 	background-size: cover;
 	background-position: center;
-	font-kerning: none;
 }
 
 #clock-timebox {
@@ -54,6 +53,10 @@ html {
 	font-weight: 800;
 	color: #A0A0A0;
 	text-shadow: 0.10em 0.10em 0.10em #202020;
+}
+
+#clock-time-wrapper, #clock-utc {
+	font-kerning: none;
 }
 
 #clock-time {
@@ -111,18 +114,40 @@ html {
 
 /* Admin module */
 
-#admin {
+#admin, #admin-content {
 	position: absolute;
 	width: 100%;
 	height: 100%;
 }
 
-#admin-content {
+#admin-gear {
 	position: absolute;
 	box-sizing: padding-box;
 	width: 100%;
-	height: 100%;
+	padding-top: 4em;
+	padding-right: 4em;
+	text-align: right;
+	font-size: 10%;
+	opacity: 0.7;
+}
+
+#admin-gear img {
+	width: 12em;
+}
+
+#admin-content {
+	box-sizing: padding-box;
 	padding: 1.5em;
+}
+
+#admin-content > div {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	border: 1em solid transparent;
+	border-radius: 1em;
+	background-color: #FFFFFF;
+	color: #000000;
 }
 
 #admin-content p {
@@ -140,33 +165,12 @@ html {
 	text-decoration: none;
 }
 
+#admin-content img {
+	vertical-align: middle;
+}
+
 #admin-content small {
 	font-size: 70%;
-}
-
-#admin-content > div {
-	box-sizing: border-box;
-	width: 100%;
-	height: 100%;
-	border: 1em solid transparent;
-	border-radius: 1em;
-	background-color: #FFFFFF;
-	color: #000000;
-}
-
-#admin-gear {
-	position: absolute;
-	box-sizing: padding-box;
-	width: 100%;
-	padding-top: 4em;
-	padding-right: 4em;
-	text-align: right;
-	font-size: 10%;
-	opacity: 0.7;
-}
-
-#admin-gear img {
-	width: 12em;
 }
 
 
@@ -193,10 +197,10 @@ html {
 #morning h1 {
 	margin-top: 0em;
 	padding-bottom: 0.2em;
-	text-align: center;
 	border-bottom: 0.06em solid #EDBB34;
 	font-size: 130%;
 	font-weight: 800;
+	text-align: center;
 	color: #EDBB34;
 }
 
