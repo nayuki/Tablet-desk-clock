@@ -41,6 +41,12 @@ function twoDigits(n) {
 }
 
 
+// Monkey patching
+Date.prototype.clone = function() {
+	return new Date(this.getTime());
+};
+
+
 /**** Clock module ****/
 
 var clockModule = new function() {
@@ -93,7 +99,7 @@ var clockModule = new function() {
 		
 		// Schedule next update at 05:00 local time
 		var now = new Date();
-		var next = new Date(now.getTime());
+		var next = now.clone();
 		next.setHours(5);
 		next.setMinutes(0);
 		next.setSeconds(0);
@@ -219,7 +225,7 @@ var weatherModule = new function() {
 		
 		// Schedule next update at about 5 minutes past the hour
 		var now = new Date();
-		var next = new Date(now.getTime());
+		var next = now.clone();
 		next.setMinutes(4);
 		next.setSeconds(0);
 		next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Deliberate jitter of 2 minutes
@@ -309,7 +315,7 @@ var morningModule = new function() {
 	// Shows the morning data every day at 07:00
 	function scheduleNextMorning() {
 		var now = new Date();
-		var next = new Date(now.getTime());
+		var next = now.clone();
 		next.setHours(7);
 		next.setMinutes(0);
 		next.setSeconds(0);
