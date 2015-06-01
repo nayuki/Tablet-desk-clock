@@ -54,6 +54,17 @@ Date.prototype.clone = function() {
 };
 
 
+// Calls the given function strictly at or after the given wakeup datetime (i.e. getCorrectedDatetime().getTime() >= wake.getTime()).
+// The given function may be called immediately synchronously or asynchronously later.
+function scheduleCall(func, wake) {
+	var delay = wake.getTime() - getCorrectedDatetime().getTime();
+	if (delay <= 0)
+		func();
+	else
+		setTimeout(function() { scheduleCall(func, wake); }, delay);
+}
+
+
 /**** Clock module ****/
 
 var clockModule = new function() {
@@ -67,11 +78,12 @@ var clockModule = new function() {
 	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
 		var d = getCorrectedDatetime();
-		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
 		secondsTextNode.setText(twoDigits(d.getSeconds()));  // Local seconds: "19"
 		timeTextNode   .setText(twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes()));  // Local time: "14:32"
 		utcTextNode    .setText(twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");  // UTC date/time: "15-Fri 18:32 UTC"
 		dateTextNode   .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
+		d.setMilliseconds(1000);
+		scheduleCall(autoUpdateClockDisplay, d);
 	}
 	
 	// Updates the clock wallpaper once.
@@ -110,12 +122,9 @@ var clockModule = new function() {
 		next.setMinutes(0);
 		next.setSeconds(0);
 		next.setMilliseconds(0);
-		if (next.getTime() < now.getTime() + 60000)  // Compensate for possible early wake-up
+		if (next.getTime() <= now.getTime())
 			next.setDate(next.getDate() + 1);
-		var delay = next.getTime() - now.getTime();
-		if (delay <= 0)  // Shouldn't happen, but just in case
-			delay = 24 * 60 * 60 * 1000;
-		setTimeout(autoUpdateWallpaper, delay);
+		scheduleCall(autoUpdateWallpaper, next);
 	}
 	
 	// Updates the server-versus-client time offset at startup only
@@ -240,10 +249,7 @@ var weatherModule = new function() {
 		next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Deliberate jitter of 2 minutes
 		if (next.getTime() < now.getTime() || next.getHours() == now.getHours() && now.getMinutes() >= 4)
 			next.setHours(next.getHours() + 1);
-		var delay = next.getTime() - now.getTime();
-		if (delay <= 0)  // Shouldn't happen, but just in case
-			delay = 60 * 60 * 1000;
-		setTimeout(autoUpdateWeather, delay);
+		scheduleCall(autoUpdateWeather, next);
 	}
 	
 	// Initialization
@@ -329,12 +335,9 @@ var morningModule = new function() {
 		next.setMinutes(0);
 		next.setSeconds(0);
 		next.setMilliseconds(0);
-		if (next.getTime() < now.getTime() + 60000)  // Compensate for possible early wake-up
+		if (next.getTime() < now.getTime())
 			next.setDate(next.getDate() + 1);
-		var delay = next.getTime() - now.getTime();
-		if (delay <= 0)  // Shouldn't happen, but just in case
-			delay = 6 * 3600 * 1000;
-		setTimeout(showMorning, delay);
+		scheduleCall(showMorning, next);
 	}
 	
 	// Initialization
