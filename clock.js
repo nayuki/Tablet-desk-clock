@@ -1,3 +1,11 @@
+/* 
+ * Tablet desk clock
+ * 
+ * Copyright (c) 2015 Project Nayuki
+ * All rights reserved. Contact Nayuki for licensing.
+ * http://www.nayuki.io/page/tablet-desk-clock
+ */
+
 "use strict";
 
 
