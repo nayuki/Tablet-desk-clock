@@ -41,6 +41,13 @@ function twoDigits(n) {
 }
 
 
+var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
+
+// Returns the server's current time as a Date object.
+function getCorrectedDatetime() {
+	return new Date(Date.now() + timeOffset);
+}
+
 // Monkey patching
 Date.prototype.clone = function() {
 	return new Date(this.getTime());
@@ -56,11 +63,10 @@ var clockModule = new function() {
 	var utcTextNode     = new MemoizingTextNode("clock-utc");
 	var dateTextNode    = new MemoizingTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-	var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
 	
 	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
-		var d = new Date(Date.now() + timeOffset);
+		var d = getCorrectedDatetime();
 		setTimeout(autoUpdateClockDisplay, 1000 - d.getTime() % 1000 + 20);  // Target the next update slightly after next second
 		secondsTextNode.setText(twoDigits(d.getSeconds()));  // Local seconds: "19"
 		timeTextNode   .setText(twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes()));  // Local time: "14:32"
@@ -98,7 +104,7 @@ var clockModule = new function() {
 		randomizeWallpaper();
 		
 		// Schedule next update at 05:00 local time
-		var now = new Date();
+		var now = getCorrectedDatetime();
 		var next = now.clone();
 		next.setHours(5);
 		next.setMinutes(0);
@@ -119,8 +125,11 @@ var clockModule = new function() {
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
 				var data = JSON.parse(xhr.response);
-				if (typeof data == "number")
+				if (typeof data == "number") {
 					timeOffset = data - Date.now();
+					if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
+						timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
+				}
 			};
 			xhr.ontimeout = function() {
 				if (retryCount < 10)
@@ -192,7 +201,7 @@ var weatherModule = new function() {
 				sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
 				conditionTextNode.data = data["condition"];
 				temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
-				var d = new Date();
+				var d = getCorrectedDatetime();
 				getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
 			}
 			weatherTextIsSet = true;
@@ -224,7 +233,7 @@ var weatherModule = new function() {
 		doWeatherRequest(0);
 		
 		// Schedule next update at about 5 minutes past the hour
-		var now = new Date();
+		var now = getCorrectedDatetime();
 		var next = now.clone();
 		next.setMinutes(4);
 		next.setSeconds(0);
@@ -288,7 +297,7 @@ var morningModule = new function() {
 				addMessage("(Error)");
 			} else {
 				clearMessages();
-				var d = new Date();
+				var d = getCorrectedDatetime();
 				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
 				if (key in data) {
 					var msgs = data[key];
@@ -314,7 +323,7 @@ var morningModule = new function() {
 	
 	// Shows the morning data every day at 07:00
 	function scheduleNextMorning() {
-		var now = new Date();
+		var now = getCorrectedDatetime();
 		var next = now.clone();
 		next.setHours(7);
 		next.setMinutes(0);
