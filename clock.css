@@ -126,15 +126,15 @@ html {
 }
 
 #admin-content p {
-	margin-top: 1.0em;
-	margin-bottom: 1.0em;
+	margin-top: 0.7em;
+	margin-bottom: 0.7em;
 	font-size: 90%;
 }
 
 #admin-content a {
 	display: inline-block;
 	padding: 0.5em;
-	border-radius: 0.5em;
+	border-radius: 0.6em;
 	background-color: #F0F0F0;
 	color: inherit;
 	text-decoration: none;
