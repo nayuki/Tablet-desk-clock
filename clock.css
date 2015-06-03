@@ -122,10 +122,7 @@ html {
 
 #admin-gear {
 	position: absolute;
-	box-sizing: padding-box;
-	width: 100%;
-	padding-top: 4em;
-	padding-right: 4em;
+	right: 0em;
 	text-align: right;
 	font-size: 10%;
 	opacity: 0.7;
@@ -133,6 +130,7 @@ html {
 
 #admin-gear img {
 	width: 12em;
+	padding: 4em 4em 2em 2em;
 }
 
 #admin-content {

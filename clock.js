@@ -162,10 +162,11 @@ var clockModule = new function() {
 /**** Admin module ****/
 
 var adminModule = new function() {
+	var adminContentElem = document.getElementById("admin-content");
+	
 	// Toggles whether the admin pane is shown or hidden.
-	this.togglePane = function() {
-		var elem = document.getElementById("admin-content");
-		elem.style.display = elem.style.display == "none" ? "block" : "none";
+	var togglePane = this.togglePane = function() {
+		adminContentElem.style.display = adminContentElem.style.display == "none" ? "block" : "none";
 	};
 	
 	this.reloadWeather = function() {
@@ -173,6 +174,12 @@ var adminModule = new function() {
 		weatherModule.conditionTextNode  .data = "";
 		weatherModule.temperatureTextNode.data = "(Weather loading...)";
 		weatherModule.doWeatherRequest();
+	};
+	
+	// Initialization
+	adminContentElem.onclick = function(e) {
+		if (e.target == adminContentElem)
+			togglePane();
 	};
 }
 
