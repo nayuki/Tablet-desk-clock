@@ -171,6 +171,36 @@ html {
 	font-size: 70%;
 }
 
+#admin-content.showing {
+	animation-duration: 100ms;
+	animation-fill-mode: both;
+	animation-name: fadein;
+}
+
+#admin-content.hiding {
+	animation-duration: 300ms;
+	animation-fill-mode: both;
+	animation-name: fadeout;
+}
+
+@keyframes fadein {
+	from {
+		opacity: 0.0;
+	}
+	to {
+		opacity: 1.0;
+	}
+}
+
+@keyframes fadeout {
+	from {
+		opacity: 1.0;
+	}
+	to {
+		opacity: 0.0;
+	}
+}
+
 
 /* Morning module */
 

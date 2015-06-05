@@ -163,10 +163,26 @@ var clockModule = new function() {
 
 var adminModule = new function() {
 	var adminContentElem = document.getElementById("admin-content");
+	var isAnimating = false;
 	
 	// Toggles whether the admin pane is shown or hidden.
 	var togglePane = this.togglePane = function() {
-		adminContentElem.style.display = adminContentElem.style.display == "none" ? "block" : "none";
+		if (!isAnimating) {
+			isAnimating = true;
+			if (adminContentElem.style.display == "none") {
+				adminContentElem.className = "showing";
+				adminContentElem.style.display = "block";
+				setTimeout(function() {
+					adminContentElem.className = "";
+					isAnimating = false; }, 150);
+			} else {
+				adminContentElem.className = "hiding";
+				setTimeout(function() {
+					adminContentElem.style.display = "none";
+					adminContentElem.className = "";
+					isAnimating = false; }, 350);
+			}
+		}
 	};
 	
 	this.reloadWeather = function() {
