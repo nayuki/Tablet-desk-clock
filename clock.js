@@ -275,8 +275,11 @@ var morningModule = new function() {
 	}
 	
 	function hideMorning() {
-		morningElem.style.display = "none";
-		clearMessages();
+		morningElem.className = "hiding";
+		setTimeout(function() {
+			morningElem.style.display = "none";
+			morningElem.className = "";
+			clearMessages(); }, 600);
 	}
 	
 	function addMessage(text) {
