@@ -25,6 +25,23 @@ html {
 	-moz-user-select: none;  /* Accidental text selection on touchscreens is annoying */
 }
 
+.showing {
+	animation-fill-mode: both;
+	animation-name: fadein;
+	animation-direction: normal;
+}
+
+.hiding {
+	animation-fill-mode: both;
+	animation-name: fadein;
+	animation-direction: reverse;
+}
+
+@keyframes fadein {
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
 
 /* Clock module */
 
@@ -173,21 +190,10 @@ html {
 
 #admin-content.showing {
 	animation-duration: 100ms;
-	animation-fill-mode: both;
-	animation-name: fadein;
-	animation-direction: normal;
 }
 
 #admin-content.hiding {
 	animation-duration: 300ms;
-	animation-fill-mode: both;
-	animation-name: fadein;
-	animation-direction: reverse;
-}
-
-@keyframes fadein {
-	from { opacity: 0.0; }
-	to { opacity: 1.0; }
 }
 
 
