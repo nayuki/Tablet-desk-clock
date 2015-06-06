@@ -175,30 +175,19 @@ html {
 	animation-duration: 100ms;
 	animation-fill-mode: both;
 	animation-name: fadein;
+	animation-direction: normal;
 }
 
 #admin-content.hiding {
 	animation-duration: 300ms;
 	animation-fill-mode: both;
-	animation-name: fadeout;
+	animation-name: fadein;
+	animation-direction: reverse;
 }
 
 @keyframes fadein {
-	from {
-		opacity: 0.0;
-	}
-	to {
-		opacity: 1.0;
-	}
-}
-
-@keyframes fadeout {
-	from {
-		opacity: 1.0;
-	}
-	to {
-		opacity: 0.0;
-	}
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
 }
 
 
