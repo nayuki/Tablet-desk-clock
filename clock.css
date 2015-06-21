@@ -101,7 +101,6 @@ html {
 
 #clock-weatherbox > div {
 	display: table-cell;
-	width: 50%;
 	vertical-align: bottom;
 }
 
@@ -114,6 +113,10 @@ html {
 	padding-bottom: 0.267em;
 	text-align: left;
 	font-size: 150%;
+}
+
+#clock-weather-temperature, #clock-utc {
+	white-space: nowrap;
 }
 
 #clock-weather {
