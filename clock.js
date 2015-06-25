@@ -166,7 +166,7 @@ var adminModule = new function() {
 	var isAnimating = false;
 	
 	// Toggles whether the admin pane is shown or hidden.
-	var togglePane = this.togglePane = function() {
+	function togglePane() {
 		if (!isAnimating) {
 			isAnimating = true;
 			if (adminContentElem.style.display == "none") {
@@ -185,21 +185,28 @@ var adminModule = new function() {
 		}
 	};
 	
-	this.reloadWeather = function() {
+	document.getElementById("admin-gear").getElementsByTagName("img")[0].onclick = togglePane;
+	
+	// For clicking outside the admin box
+	adminContentElem.onclick = function(e) {
+		if (e.target == adminContentElem)
+			togglePane();  // Hiding
+	};
+	
+	document.getElementById("admin-reload-page-button").onclick = function() {
+		window.location.reload(true);
+	};
+	
+	document.getElementById("admin-refresh-weather-button").onclick = function() {
 		weatherModule.sunrisesetTextNode .data = "";
 		weatherModule.conditionTextNode  .data = "";
 		weatherModule.temperatureTextNode.data = "(Weather loading...)";
 		weatherModule.doWeatherRequest();
 	};
 	
-	// Initialization
-	document.getElementById("admin-gear").getElementsByTagName("img")[0].onclick = togglePane;
-	document.getElementById("admin-reload-page-button").onclick = function() { window.location.reload(true); };
-	document.getElementById("admin-refresh-weather-button").onclick = this.reloadWeather;
-	document.getElementById("admin-change-wallpaper-button").onclick = function() { clockModule.randomizeWallpaper(); togglePane(); };
-	adminContentElem.onclick = function(e) {
-		if (e.target == adminContentElem)
-			togglePane();  // Hiding
+	document.getElementById("admin-change-wallpaper-button").onclick = function() {
+		clockModule.randomizeWallpaper();
+		togglePane();
 	};
 }
 
