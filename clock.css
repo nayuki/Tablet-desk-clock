@@ -178,7 +178,7 @@ html {
 	font-size: 90%;
 }
 
-#admin-content a {
+#admin-content span.button {
 	display: inline-block;
 	padding: 0.47em 0.50em 0.33em;
 	border-radius: 0.6em;

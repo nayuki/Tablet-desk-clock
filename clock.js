@@ -194,6 +194,9 @@ var adminModule = new function() {
 	
 	// Initialization
 	document.getElementById("admin-gear").getElementsByTagName("img")[0].onclick = togglePane;
+	document.getElementById("admin-reload-page-button").onclick = function() { window.location.reload(true); };
+	document.getElementById("admin-refresh-weather-button").onclick = this.reloadWeather;
+	document.getElementById("admin-change-wallpaper-button").onclick = function() { clockModule.randomizeWallpaper(); togglePane(); };
 	adminContentElem.onclick = function(e) {
 		if (e.target == adminContentElem)
 			togglePane();  // Hiding
