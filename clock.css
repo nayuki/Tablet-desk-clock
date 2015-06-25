@@ -73,20 +73,22 @@ html {
 	font-family: "Swiss 721 BT Rounded", "Swiss 721 BT", sans-serif;
 	font-weight: 800;
 	color: #A8A8A8;
-	text-shadow: 0.15em 0.15em 0.15em #202020;
+	font-size: 650%;
+	text-shadow: 0.023em 0.023em 0.023em #202020;
 }
 
 #clock-time-wrapper, #clock-utc {
 	font-kerning: none;
 }
 
-#clock-time {
-	font-size: 650%;
+#clock-second {
+	padding-left: 0.2em;
+	font-size: 57%;
 }
 
-#clock-seconds {
-	padding-left: 0.2em;
-	font-size: 370%;
+#clock-colon {
+	position: relative;
+	top: -0.07em;  /* For the font Swiss 721 BT Rounded */
 }
 
 #clock-date {

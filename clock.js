@@ -86,19 +86,21 @@ function getAndProcessJson(url, timeout, retryCount, func) {
 
 var clockModule = new function() {
 	// Private variables
-	var secondsTextNode = new MemoizingTextNode("clock-seconds");
-	var timeTextNode    = new MemoizingTextNode("clock-time");
-	var utcTextNode     = new MemoizingTextNode("clock-utc");
-	var dateTextNode    = new MemoizingTextNode("clock-date");
+	var hourTextNode   = new MemoizingTextNode("clock-hour");
+	var minuteTextNode = new MemoizingTextNode("clock-minute");
+	var secondTextNode = new MemoizingTextNode("clock-second");
+	var utcTextNode    = new MemoizingTextNode("clock-utc");
+	var dateTextNode   = new MemoizingTextNode("clock-date");
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	
 	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
 		var d = getCorrectedDatetime();
-		secondsTextNode.setText(twoDigits(d.getSeconds()));  // Local seconds: "19"
-		timeTextNode   .setText(twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes()));  // Local time: "14:32"
-		utcTextNode    .setText(twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");  // UTC date/time: "15-Fri 18:32 UTC"
-		dateTextNode   .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
+		hourTextNode  .setText(twoDigits(d.getHours  ()));  // Local hour  : "14"
+		minuteTextNode.setText(twoDigits(d.getMinutes()));  // Local minute: "32"
+		secondTextNode.setText(twoDigits(d.getSeconds()));  // Local second: "19"
+		utcTextNode   .setText(twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");  // UTC date/time: "15-Fri 18:32 UTC"
+		dateTextNode  .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
 		d.setMilliseconds(1000);
 		scheduleCall(autoUpdateClockDisplay, d);
 	}
