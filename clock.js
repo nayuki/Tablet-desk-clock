@@ -193,9 +193,10 @@ var adminModule = new function() {
 	};
 	
 	// Initialization
+	document.getElementById("admin-gear").getElementsByTagName("img")[0].onclick = togglePane;
 	adminContentElem.onclick = function(e) {
 		if (e.target == adminContentElem)
-			togglePane();
+			togglePane();  // Hiding
 	};
 }
 
