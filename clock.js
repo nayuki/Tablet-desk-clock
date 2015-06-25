@@ -104,11 +104,11 @@ var clockModule = new function() {
 	}
 	
 	// Updates the clock wallpaper once.
-	var randomizeWallpaper = this.randomizeWallpaper = function () {
+	var randomizeWallpaper = this.randomizeWallpaper = function() {
 		getAndProcessJson("/random-wallpaper.json", 3000, 0, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
-				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')"
+				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')";
 			}
 		});
 	};
@@ -140,7 +140,7 @@ var clockModule = new function() {
 		});
 	}
 	
-	// A wrapper around a DOM text node to avoid pushing unnecessary value updates to the DOM.
+	// A wrapper class around a DOM text node to avoid pushing unnecessary value updates to the DOM.
 	function MemoizingTextNode(elemId) {
 		var textNode = getChildTextNode(elemId);
 		var value = textNode.data;
@@ -208,7 +208,7 @@ var adminModule = new function() {
 		clockModule.randomizeWallpaper();
 		togglePane();
 	};
-}
+};
 
 
 /**** Weather module ****/
@@ -235,7 +235,7 @@ var weatherModule = new function() {
 			}
 			weatherTextIsSet = true;
 		});
-	}
+	};
 	
 	// Updates the weather and sunrise displays at startup and thereafter at around 4 minutes past each hour
 	function autoUpdateWeather() {
