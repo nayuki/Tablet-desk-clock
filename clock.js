@@ -187,7 +187,7 @@ var adminModule = new function() {
 		}
 	};
 	
-	document.getElementById("admin-gear").getElementsByTagName("img")[0].onclick = togglePane;
+	document.getElementById("admin-gear").onclick = togglePane;
 	
 	// For clicking outside the admin box
 	adminContentElem.onclick = function(e) {
