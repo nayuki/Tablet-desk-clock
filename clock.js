@@ -106,8 +106,8 @@ var clockModule = new function() {
 	}
 	
 	// Updates the clock wallpaper once.
-	var randomizeWallpaper = this.randomizeWallpaper = function() {
-		getAndProcessJson("/random-wallpaper.json", 3000, 0, function(data) {
+	var changeWallpaper = this.changeWallpaper = function(type) {  // Type is either "get" or "random"
+		getAndProcessJson("/" + type + "-wallpaper.json", 3000, 0, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
 				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')";
@@ -117,7 +117,7 @@ var clockModule = new function() {
 	
 	// Updates the clock wallpaper at startup and thereafter every day at 05:00.
 	function autoUpdateWallpaper() {
-		randomizeWallpaper();
+		changeWallpaper("get");
 		
 		// Schedule next update at 05:00 local time
 		var now = getCorrectedDatetime();
@@ -207,7 +207,7 @@ var adminModule = new function() {
 	};
 	
 	document.getElementById("admin-change-wallpaper-button").onclick = function() {
-		clockModule.randomizeWallpaper();
+		clockModule.changeWallpaper("random");
 		togglePane();
 	};
 };

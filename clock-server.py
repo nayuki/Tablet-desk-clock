@@ -12,7 +12,7 @@
 
 # ---- Prelude ----
 
-import bottle, datetime, json, os, random, re, sys, time, xml.etree.ElementTree
+import bottle, datetime, json, os, random, re, sqlite3, sys, time, xml.etree.ElementTree
 if sys.version_info.major == 2:
     python_version = 2
     import urllib2
@@ -62,19 +62,65 @@ def gettime():
 
 # Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png"
 @bottle.route("/random-wallpaper.json")
-def wallpaper():
+def random_wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
+	candidates = get_wallpaper_candidates()
+	if len(candidates) == 0:
+		return "null"
+	else:
+		return '"' + random.choice(candidates) + '"'
+
+
+# Yields a file name or null, a wallpaper that changes only once a day (history kept on the server side).
+@bottle.route("/get-wallpaper.json")
+def get_wallpaper():
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	candidates = get_wallpaper_candidates()
+	if len(candidates) == 0:
+		return "null"
+	
+	try:
+		con = sqlite3.connect("wallpaper-history.sqlite")
+		cur = con.cursor()
+		cur.execute("CREATE TABLE IF NOT EXISTS wallpaper_history(date VARCHAR NOT NULL, filename VARCHAR NOT NULL)")
+		con.commit()
+		
+		today = datetime.date.today().strftime("%Y%m%d")
+		cur.execute("SELECT filename FROM wallpaper_history WHERE date=?", (today,))
+		data = cur.fetchone()
+		if data is not None:
+			return '"' + data[0] + '"'
+		
+		cur.execute("SELECT date, filename FROM wallpaper_history ORDER BY date DESC")
+		history = cur.fetchall()
+		maxremove = min(round(len(candidates) * 0.67), len(candidates) - 3)
+		i = 0
+		while i < len(history) and i < maxremove:
+			candidates.remove(history[i][1])
+			i += 1
+		if i < len(history):
+			cur.execute("DELETE FROM wallpaper_history WHERE date <= ?", (history[i][0],))
+		result = random.choice(candidates)
+		cur.execute("INSERT INTO wallpaper_history VALUES(?, ?)", (today, result))
+		con.commit()
+		return '"' + result + '"'
+		
+	finally:
+		cur.close()
+		con.close()
+
+
+def get_wallpaper_candidates():
 	dir = "wallpapers"
 	if not os.path.isdir(dir):
-		return "null"  # No quotes in the output
+		return []
 	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))
 	items = filter(cond, os.listdir(dir))
 	if python_version == 3:
 		items = list(items)
-	if len(items) == 0:
-		return "null"
-	return '"' + random.choice(items) + '"'
+	return items
 
 
 # ---- Weather module ----
