@@ -1,9 +1,15 @@
 # 
 # A background process that polls the journal every late night and sends relevant data to the clock server.
-# Designed to run on my desktop PC. For Python 2.7.
+# Designed to run on my desktop PC. For Python 2 and 3.
 # 
 
-import datetime, json, re, time, urllib2
+import datetime, json, re, sys, time
+if sys.version_info.major == 2:
+    python_version = 2
+    import urllib2
+else:
+	python_version = 3
+	import urllib.request
 
 
 journal_path = None
@@ -12,9 +18,13 @@ server_url = None
 
 def main():
 	global journal_path, server_url
-	with open("./reminder-data-provider.ini", "r") as f:
-		journal_path = f.readline().rstrip("\r\n").decode("UTF-8")
-		server_url = f.readline().rstrip("\r\n").decode("UTF-8")
+	file_path = "./reminder-data-provider.ini"
+	with (open(file_path, "r") if python_version == 2 else open(file_path, "r", encoding="UTF-8")) as f:
+		journal_path = f.readline().rstrip("\r\n")
+		server_url = f.readline().rstrip("\r\n")
+		if python_version == 2:
+			journal_path = journal_path.decode("UTF-8")
+			server_url = server_url.decode("UTF-8")
 	
 	while True:
 		# Sleep until the next 10:00 UTC
@@ -32,8 +42,10 @@ def main():
 
 
 def run_once():
-	with open(journal_path, "r") as f:
-		text = f.read().decode("UTF-8")
+	with (open(journal_path, "r") if python_version == 2 else open(journal_path, "r", encoding="UTF-8")) as f:
+		text = f.read()
+		if python_version == 2:
+			text = text.decode("UTF-8")
 	
 	data = {}  # Looks like {"20150515":["Alpha","Beta","Gamma"], "20150516":["One","Two",]}
 	today = datetime.date.today()
@@ -49,7 +61,11 @@ def run_once():
 		elif datekey is not None and line.startswith("* "):
 			data[datekey].append(line[2 : ])
 	
-	stream = urllib2.urlopen(server_url, data=json.dumps(data))  # HTTP POST request
+	# HTTP POST request
+	if python_version == 2:
+		urllib2.urlopen(server_url, data=json.dumps(data))
+	else:
+		urllib.request.urlopen(server_url, data=json.dumps(data).encode("UTF-8"))
 	stream.read()  # Discard
 	stream.close()
 
