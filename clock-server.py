@@ -77,7 +77,7 @@ def random_wallpaper():
 def get_wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
-	candidates = get_wallpaper_candidates()
+	candidates = set(get_wallpaper_candidates())
 	if len(candidates) == 0:
 		return "null"
 	
@@ -96,13 +96,12 @@ def get_wallpaper():
 		cur.execute("SELECT date, filename FROM wallpaper_history ORDER BY date DESC")
 		history = cur.fetchall()
 		maxremove = min(round(len(candidates) * 0.67), len(candidates) - 3)
-		i = 0
-		while i < len(history) and i < maxremove:
-			candidates.remove(history[i][1])
-			i += 1
-		if i < len(history):
-			cur.execute("DELETE FROM wallpaper_history WHERE date <= ?", (history[i][0],))
-		result = random.choice(candidates)
+		for row in history[ : maxremove]:
+			candidates.discard(row[1])
+		maxhistory = 300
+		if len(history) > maxhistory:
+			cur.execute("DELETE FROM wallpaper_history WHERE date <= ?", (history[maxhistory][0],))
+		result = random.choice(list(candidates))
 		cur.execute("INSERT INTO wallpaper_history VALUES(?, ?)", (today, result))
 		con.commit()
 		return '"' + result + '"'
