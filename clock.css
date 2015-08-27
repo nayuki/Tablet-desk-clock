@@ -125,6 +125,11 @@ html {
 	white-space: nowrap;
 }
 
+#clock-weather a {
+	color: inherit;
+	text-decoration: none;
+}
+
 #clock-weather {
 	padding-right: 0.6em;
 	text-align: right;

@@ -27,21 +27,19 @@
 				</div>
 				<div>
 					<div id="clock-weather">
-						<span id="clock-weather-condition"></span><span id="clock-weather-temperature">&#xA0;</span>
+						<a id="clock-weather-condition" href="http://www.theweathernetwork.com/weather/canada/ontario/north-york" target="_blank" onclick="this.blur();"></a><a id="clock-weather-temperature" href="http://www.theweathernetwork.com/hourly-weather-forecast/canada/ontario/north-york" target="_blank" onclick="this.blur();">&#xA0;</a>
 					</div>
 				</div>
 			</div>
 		</article>
 		
-		<article id="admin">
-			<div id="admin-content" style="display:none">
-				<div>
-					<p><span id="admin-reload-page-button" class="button"><img src="reload-icon.svg" style="width:1.1em; padding:0.15em"/> Reload this page</span></p>
-					<p><span id="admin-refresh-weather-button" class="button"><img src="weather-icon.svg" style="width:1.4em; padding:0em"/> Refresh weather data</span> <small>(last updated <span id="admin-last-weather"></span>)</small></p>
-					<p><span id="admin-change-wallpaper-button" class="button"><img src="picture-icon.svg" style="width:1.2em; padding:0.1em"/> Change wallpaper randomly</span></p>
-				</div>
+		<img src="gear-icon.svg" id="admin-gear" class="button"/>
+		<article id="admin-content" style="display:none">
+			<div>
+				<p><span id="admin-reload-page-button" class="button"><img src="reload-icon.svg" style="width:1.1em; padding:0.15em"/> Reload this page</span></p>
+				<p><span id="admin-refresh-weather-button" class="button"><img src="weather-icon.svg" style="width:1.4em; padding:0em"/> Refresh weather data</span> <small>(last updated <span id="admin-last-weather"></span>)</small></p>
+				<p><span id="admin-change-wallpaper-button" class="button"><img src="picture-icon.svg" style="width:1.2em; padding:0.1em"/> Change wallpaper randomly</span></p>
 			</div>
-			<img src="gear-icon.svg" id="admin-gear" class="button"/>
 		</article>
 		
 		<article id="morning" style="display:none">
