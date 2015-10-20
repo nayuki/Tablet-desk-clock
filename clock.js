@@ -189,7 +189,7 @@ var adminModule = new function() {
 					isAnimating = false; }, 350);
 			}
 		}
-	};
+	}
 	
 	document.getElementById("admin-gear").onclick = togglePane;
 	
