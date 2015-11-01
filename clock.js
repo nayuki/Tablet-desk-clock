@@ -9,7 +9,7 @@
 "use strict";
 
 
-/**** Shared constants and functions ****/
+/*---- Shared constants and functions ----*/
 
 // Useful Unicode characters
 var DEGREE_CHAR      = "\u00B0";
@@ -82,7 +82,7 @@ function getAndProcessJson(url, timeout, retryCount, func) {
 }
 
 
-/**** Clock module ****/
+/*---- Clock module ----*/
 
 var clockModule = new function() {
 	// Private variables
@@ -165,7 +165,7 @@ var clockModule = new function() {
 };
 
 
-/**** Admin module ****/
+/*---- Admin module ----*/
 
 var adminModule = new function() {
 	var adminContentElem = document.getElementById("admin-content");
@@ -217,7 +217,7 @@ var adminModule = new function() {
 };
 
 
-/**** Weather module ****/
+/*---- Weather module ----*/
 
 var weatherModule = new function() {
 	var sunrisesetTextNode  = this.sunrisesetTextNode  = getChildTextNode("morning-sunriseset");
@@ -270,7 +270,7 @@ var weatherModule = new function() {
 };
 
 
-/**** Morning module ****/
+/*---- Morning module ----*/
 
 var morningModule = new function() {
 	var morningElem = document.getElementById("morning");
