@@ -3,7 +3,7 @@
 # 
 # Copyright (c) 2015 Project Nayuki
 # All rights reserved. Contact Nayuki for licensing.
-# http://www.nayuki.io/page/tablet-desk-clock
+# https://www.nayuki.io/page/tablet-desk-clock
 # 
 # Run this web server script with no arguments. For Python 2 and 3.
 # Open web browser and visit: http://localhost:51367/
