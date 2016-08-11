@@ -94,6 +94,20 @@ html {
 	font-weight: 400;
 }
 
+#clock-statusbox {
+	position: absolute;
+	left: 1vw;
+	top: 1vw;
+}
+
+#clock-statusbox img {
+	width: 1.2em;
+	margin-right: 0.15em;
+	padding: 0.15em;
+	border-radius: 0.1em;
+	background-color: rgba(255,255,255,0.6);
+}
+
 #clock-weatherbox {
 	position: absolute;
 	right: 1vw;

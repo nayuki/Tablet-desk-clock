@@ -143,8 +143,13 @@ var clockModule = new function() {
 	function updateTimeOffset() {
 		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
 			timeOffset = data[1] - Date.now();
-			if (data[0] == "server" && Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
-				timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
+			if (data[0] == "ntp")
+				document.getElementById("clock-status-no-clock").style.display = "none";
+			else if (data[0] == "server") {
+				document.getElementById("clock-status-no-clock").style.removeProperty("display");
+				if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
+					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
+			}
 		});
 	}
 	
