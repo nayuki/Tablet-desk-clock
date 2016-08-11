@@ -9,12 +9,7 @@ if sys.version_info[ : 3] < (3, 0, 0):
 import datetime, json, os, re, time, urllib.request
 
 
-journal_path = None
-server_url = None
-
-
 def main():
-	global journal_path, server_url
 	file_path = "./reminder-data-provider.ini"
 	with open(file_path, "r", encoding="UTF-8", newline=None) as f:
 		journal_path = f.readline().rstrip("\n")
@@ -29,13 +24,13 @@ def main():
 		time.sleep((next - now).total_seconds())
 		
 		try:
-			run_once()
+			run_once(journal_path, server_url)
 		except:
 			pass
 		time.sleep(6 * 3600)  # Safety delay
 
 
-def run_once():
+def run_once(journal_path, server_url):
 	with open(journal_path, "r", encoding="UTF-8", newline=None) as f:
 		lines = f.read().split("\n")
 	
