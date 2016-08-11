@@ -41,7 +41,7 @@ def static_file(path):
 
 AUTHORIZED_STATIC_FILES = [
 	"clock.css", "clock.html", "clock.js",
-	"gear-icon.svg", "no-clock-icon.svg", "picture-icon.svg", "reload-icon.svg", "weather-icon.svg",
+	"gear-icon.svg", "no-clock-icon.svg", "no-internet-icon.svg", "picture-icon.svg", "reload-icon.svg", "weather-icon.svg",
 	"swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf",
 ]
 MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
@@ -148,6 +148,22 @@ def get_wallpaper_candidates():
 	return [name for name in os.listdir(dir) if cond(name)]
 
 
+# Yields true or false to indicate whether the clock server has a connection to the Internet or not.
+@bottle.route("/network-status.json")
+def internet_test():
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	for _ in range(3):
+		host = random.choice(configuration["internet-test-web-sites"])
+		try:
+			sock = socket.create_connection((host, 80), timeout=1.0)
+			sock.close()
+			return "true"
+		except:
+			pass
+	return "false"
+
+
 # ---- Weather module ----
 
 # Yields an object containing weather and sunrise data, e.g.:
@@ -218,4 +234,6 @@ morning_reminders = {}
 # ---- Server initialization ----
 
 if __name__ == "__main__":
+	with open("config.json", "r", encoding="UTF-8") as f:
+		configuration = json.load(f)  # Global variable
 	bottle.run(host="0.0.0.0", port=51367, reloader=True)

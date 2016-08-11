@@ -139,6 +139,16 @@ var clockModule = new function() {
 		scheduleCall(autoUpdateWallpaper, next);
 	}
 	
+	function autoUpdateNetworkStatus() {
+		getAndProcessJson("/network-status.json", 60000, 0, function(data) {
+			if (data === true)
+				document.getElementById("clock-status-no-internet").style.display = "none";
+			else if (data === false)
+				document.getElementById("clock-status-no-internet").style.removeProperty("display");
+		});
+		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000);
+	}
+	
 	// Updates the server-versus-client time offset at startup only
 	function updateTimeOffset() {
 		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
@@ -168,6 +178,7 @@ var clockModule = new function() {
 	// Initialization
 	autoUpdateClockDisplay();
 	autoUpdateWallpaper();
+	autoUpdateNetworkStatus();
 	updateTimeOffset();
 };
 
