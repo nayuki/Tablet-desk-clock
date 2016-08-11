@@ -1,7 +1,7 @@
 /* 
  * Tablet desk clock
  * 
- * Copyright (c) 2015 Project Nayuki
+ * Copyright (c) 2016 Project Nayuki
  * All rights reserved. Contact Nayuki for licensing.
  * https://www.nayuki.io/page/tablet-desk-clock
  */
@@ -86,11 +86,11 @@ function getAndProcessJson(url, timeout, retryCount, func) {
 
 var clockModule = new function() {
 	// Private variables
-	var hourTextNode   = new MemoizingTextNode("clock-hour");
+	var hourTextNode   = new MemoizingTextNode("clock-hour"  );
 	var minuteTextNode = new MemoizingTextNode("clock-minute");
 	var secondTextNode = new MemoizingTextNode("clock-second");
-	var utcTextNode    = new MemoizingTextNode("clock-utc");
-	var dateTextNode   = new MemoizingTextNode("clock-date");
+	var utcTextNode    = new MemoizingTextNode("clock-utc"   );
+	var dateTextNode   = new MemoizingTextNode("clock-date"  );
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var prevClockUpdate = null;  // In Unix seconds
 	
@@ -102,8 +102,12 @@ var clockModule = new function() {
 			hourTextNode  .setText(twoDigits(d.getHours  ()));  // Local hour  : "14"
 			minuteTextNode.setText(twoDigits(d.getMinutes()));  // Local minute: "32"
 			secondTextNode.setText(twoDigits(d.getSeconds()));  // Local second: "19"
-			utcTextNode   .setText(twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE + twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");  // UTC date/time: "15-Fri 18:32 UTC"
-			dateTextNode  .setText(d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH + twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);  // Local date: "2015-05-15-Fri"
+			utcTextNode.setText(  // UTC date/time: "15-Fri 18:32 UTC"
+				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
+				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
+			dateTextNode.setText(  // Local date: "2015-05-15-Fri"
+				d.getFullYear() + EN_DASH + twoDigits(d.getMonth() + 1) + EN_DASH +
+				twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);
 			prevClockUpdate = curClockUpdate;
 		}
 		setTimeout(autoUpdateClockDisplay, 1000 - getCorrectedDatetime().getTime() % 1000);
@@ -318,7 +322,8 @@ var morningModule = new function() {
 			} else {
 				clearMessages();
 				var d = getCorrectedDatetime();
-				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") + (d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
+				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") +
+					(d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
 				if (key in data) {
 					var msgs = data[key];
 					if (msgs.length == 0)
