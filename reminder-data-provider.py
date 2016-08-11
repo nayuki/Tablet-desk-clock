@@ -16,9 +16,9 @@ server_url = None
 def main():
 	global journal_path, server_url
 	file_path = "./reminder-data-provider.ini"
-	with open(file_path, "r", encoding="UTF-8") as f:
-		journal_path = f.readline().rstrip("\r\n")
-		server_url = f.readline().rstrip("\r\n")
+	with open(file_path, "r", encoding="UTF-8", newline=None) as f:
+		journal_path = f.readline().rstrip("\n")
+		server_url = f.readline().rstrip("\n")
 	
 	while True:
 		# Sleep until the next 10:00 UTC
@@ -36,13 +36,13 @@ def main():
 
 
 def run_once():
-	with open(journal_path, "r", encoding="UTF-8") as f:
-		text = f.read()
+	with open(journal_path, "r", encoding="UTF-8", newline=None) as f:
+		lines = f.read().split("\n")
 	
 	data = {}  # Looks like {"20150515":["Alpha","Beta","Gamma"], "20150516":["One","Two",]}
 	today = datetime.date.today()
 	datekey = None
-	for line in text.split("\n"):
+	for line in lines:
 		if DATE_REGEX.match(line) is not None:
 			date = datetime.date(int(line[0:4]), int(line[5:7]), int(line[8:10]))
 			if 0 <= (date - today).days <= 2:
