@@ -49,12 +49,12 @@ def run_once():
 				datekey = date.strftime("%Y%m%d")
 				data[datekey] = []
 			else:
-				lastdate = None
+				datekey = None
 		elif datekey is not None and line.startswith("* "):
 			data[datekey].append(line[2 : ])
 	
 	# HTTP POST request
-	urllib.request.urlopen(server_url, data=json.dumps(data).encode("UTF-8"))
+	stream = urllib.request.urlopen(server_url, data=json.dumps(data).encode("UTF-8"))
 	stream.read()  # Discard
 	stream.close()
 
