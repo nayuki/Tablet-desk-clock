@@ -15,7 +15,7 @@
 import sys
 if sys.version_info[ : 3] < (3, 0, 0):
 	raise RuntimeError("Requires Python 3+")
-import bottle, datetime, json, os, random, re, socket, sqlite3, struct, time, urllib.request, xml.etree.ElementTree
+import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threading, time, urllib.request, xml.etree.ElementTree
 
 
 # ---- Static file serving ----
@@ -41,7 +41,7 @@ def static_file(path):
 
 AUTHORIZED_STATIC_FILES = [
 	"clock.css", "clock.html", "clock.js",
-	"gear-icon.svg", "no-clock-icon.svg", "no-internet-icon.svg", "picture-icon.svg", "reload-icon.svg", "weather-icon.svg",
+	"desktop-computer-icon.svg", "gear-icon.svg", "laptop-computer-icon.svg", "no-clock-icon.svg", "no-internet-icon.svg", "picture-icon.svg", "reload-icon.svg", "server-computer-icon.svg", "weather-icon.svg",
 	"swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf",
 ]
 MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
@@ -148,20 +148,60 @@ def get_wallpaper_candidates():
 	return [name for name in os.listdir(dir) if cond(name)]
 
 
-# Yields true or false to indicate whether the clock server has a connection to the Internet or not.
 @bottle.route("/network-status.json")
-def internet_test():
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
-	for _ in range(3):
-		host = random.choice(configuration["internet-test-web-sites"])
+def network_status():
+	result = []
+	lock = threading.Lock()
+	def append(x):
+		lock.acquire()
+		result.append(x)
+		lock.release()
+	threads = []
+	
+	def test_internet():
+		for _ in range(3):
+			host = random.choice(configuration["internet-test-web-sites"])
+			try:
+				sock = socket.create_connection((host, 80), timeout=1.0)
+				sock.close()
+				append(True)
+				break
+			except:
+				pass
+		else:
+			append(False)
+	th = threading.Thread(target=test_internet)
+	threads.append(th)
+	th.start()
+	
+	COMPUTER_TYPES = ("desktop", "laptop", "server")
+	def test_computer(type, host, port):
 		try:
-			sock = socket.create_connection((host, 80), timeout=1.0)
+			sock = socket.create_connection((host, port), timeout=1.0)
 			sock.close()
-			return "true"
+			append(type)
 		except:
 			pass
-	return "false"
+	for comptype in COMPUTER_TYPES:
+		for (host, port) in configuration["local-test-computers"][comptype]:
+			th = threading.Thread(target=test_computer, args=(comptype,host,port))
+			threads.append(th)
+			th.start()
+	
+	for th in threads:
+		th.join()
+	def key_func(x):
+		if type(x) is bool:
+			return -1
+		elif type(x) is str:
+			return COMPUTER_TYPES.index(x)
+		else:
+			raise AssertionError()
+	result.sort(key=key_func)
+	
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	return json.dumps(result)
 
 
 # ---- Weather module ----

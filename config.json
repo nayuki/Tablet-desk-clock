@@ -1,4 +1,9 @@
 {
+	"local-test-computers": {
+		"desktop": [],
+		"laptop": [],
+		"server": []
+	},
 	"internet-test-web-sites": [
 		"google.com",
 		"youtube.com",

@@ -141,10 +141,21 @@ var clockModule = new function() {
 	
 	function autoUpdateNetworkStatus() {
 		getAndProcessJson("/network-status.json", 60000, 0, function(data) {
-			if (data === true)
+			if (data[0] === true)
 				document.getElementById("clock-status-no-internet").style.display = "none";
-			else if (data === false)
+			else if (data[0] === false)
 				document.getElementById("clock-status-no-internet").style.removeProperty("display");
+			
+			var containerElem = document.getElementById("clock-status-computers");
+			while (containerElem.firstChild != null)
+				containerElem.removeChild(containerElem.firstChild);
+			data.forEach(function(val, i) {
+				if (i >= 1) {
+					var imgElem = document.createElement("img");
+					imgElem.src = val + "-computer-icon.svg";
+					containerElem.appendChild(imgElem);
+				}
+			});
 		});
 		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000);
 	}
@@ -178,8 +189,8 @@ var clockModule = new function() {
 	// Initialization
 	autoUpdateClockDisplay();
 	autoUpdateWallpaper();
-	autoUpdateNetworkStatus();
 	updateTimeOffset();
+	setTimeout(autoUpdateNetworkStatus, 5000);
 };
 
 
