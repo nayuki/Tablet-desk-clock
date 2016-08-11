@@ -1,6 +1,25 @@
 # 
-# A background process that polls the journal every late night and sends relevant data to the clock server.
-# Designed to run on my desktop PC. For Python 3+.
+# Morning reminder data provider for tablet desk clock
+# 
+# Copyright (c) 2016 Project Nayuki
+# All rights reserved. Contact Nayuki for licensing.
+# https://www.nayuki.io/page/tablet-desk-clock
+# 
+# This is a background program reads a text journal periodically. Whenever its contents change, the
+# file is parsed and the relevant sections of data are sent to the tablet clock server. For Python 3+.
+# 
+# The configuration file has a format that looks like this (without leading spaces):
+#   /home/user/journal.txt
+#   http://localhost:51367/morning-reminders.json
+# 
+# The journal file has a format that looks like this (without leading spaces):
+#   2016-01-01-Fri
+#   miscellaneous text
+#   * This is a morning reminder, starting with asterisk+space
+#   2016-01-02-Sat
+#   * Another reminder note
+#   * More than one in a single day
+#   - A piece of non-reminder text
 # 
 
 import sys
@@ -10,31 +29,29 @@ import datetime, json, os, re, time, urllib.request
 
 
 def main():
-	file_path = "./reminder-data-provider.ini"
-	with open(file_path, "r", encoding="UTF-8", newline=None) as f:
+	# Read configuration file
+	config_file = "reminder-data-provider.ini"
+	with open(config_file, "r", encoding="UTF-8", newline=None) as f:
 		journal_path = f.readline().rstrip("\n")
 		server_url = f.readline().rstrip("\n")
 	
+	# Poll the journal file periodically
+	lastmod = None
 	while True:
-		# Sleep until the next 10:00 UTC
-		now = datetime.datetime.utcnow()
-		next = datetime.datetime(now.year, now.month, now.day, 10)
-		if next < now:
-			next += datetime.timedelta(days=1)
-		time.sleep((next - now).total_seconds())
-		
-		try:
-			run_once(journal_path, server_url)
-		except:
-			pass
-		time.sleep(6 * 3600)  # Safety delay
+		if os.path.getmtime(journal_path) != lastmod:
+			try:
+				lastmod = os.path.getmtime(journal_path)
+				run_once(journal_path, server_url)
+			except:
+				pass
+		time.sleep(10 * 60)
 
 
 def run_once(journal_path, server_url):
 	with open(journal_path, "r", encoding="UTF-8", newline=None) as f:
 		lines = f.read().split("\n")
 	
-	data = {}  # Looks like {"20150515":["Alpha","Beta","Gamma"], "20150516":["One","Two",]}
+	data = {}  # Will be populated with values like {"20150515":["Alpha","Beta","Gamma"], "20150516":["One","Two"]}
 	today = datetime.date.today()
 	datekey = None
 	for line in lines:
