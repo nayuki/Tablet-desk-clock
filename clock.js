@@ -113,8 +113,8 @@ var clockModule = new function() {
 		setTimeout(autoUpdateClockDisplay, 1000 - getCorrectedDatetime().getTime() % 1000);
 	}
 	
-	// Updates the clock wallpaper once.
-	var changeWallpaper = this.changeWallpaper = function(type) {  // Type is either "get" or "random"
+	// Updates the clock wallpaper once. Type is either "get" or "random".
+	var changeWallpaper = this.changeWallpaper = function(type) {
 		getAndProcessJson("/" + type + "-wallpaper.json", 3000, 0, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
@@ -184,13 +184,13 @@ var adminModule = new function() {
 				adminContentElem.style.display = "block";
 				setTimeout(function() {
 					adminContentElem.className = "";
-					isAnimating = false; }, 150);
+					isAnimating = false; }, 150);  // Must be a bit larger than the number declared in CSS
 			} else {
 				adminContentElem.className = "hiding";
 				setTimeout(function() {
 					adminContentElem.style.display = "none";
 					adminContentElem.className = "";
-					isAnimating = false; }, 350);
+					isAnimating = false; }, 350);  // Must be a bit larger than the number declared in CSS
 			}
 		}
 	}
@@ -300,7 +300,7 @@ var morningModule = new function() {
 		setTimeout(function() {
 			morningElem.style.display = "none";
 			morningElem.className = "";
-			clearMessages(); }, 600);
+			clearMessages(); }, 600);  // Must be a bit larger than the number declared in CSS
 	}
 	
 	function addMessage(text) {
@@ -321,6 +321,7 @@ var morningModule = new function() {
 				addMessage("(Error)");
 			} else {
 				clearMessages();
+				// For example, key = "20151231"
 				var d = getCorrectedDatetime();
 				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") +
 					(d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
