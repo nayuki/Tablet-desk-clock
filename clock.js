@@ -141,12 +141,10 @@ var clockModule = new function() {
 	
 	// Updates the server-versus-client time offset at startup only
 	function updateTimeOffset() {
-		getAndProcessJson("/time.json", 1000, 0, function(data) {
-			if (typeof data == "number") {
-				timeOffset = data - Date.now();
-				if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
-					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
-			}
+		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
+			timeOffset = data[1] - Date.now();
+			if (data[0] == "server" && Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
+				timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
 		});
 	}
 	

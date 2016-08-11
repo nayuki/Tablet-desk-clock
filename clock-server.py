@@ -49,21 +49,14 @@ MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"appl
 
 # ---- Clock module ----
 
-# Yields the current Unix millisecond time as a number, e.g.: 1433185355946
-@bottle.route("/time.json")
+# Yields the time source and current Unix millisecond time, e.g.: ["server", 1433185355946] or ["ntp", 1470939694075].
+@bottle.route("/get-time.json")
 def gettime():
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
-	return str(round(time.time() * 1000))
-
-
-@bottle.route("/ntp-time.json")
-def get_ntp_time():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	
 	sock = None
-	try:
+	try:  # Try to get time from NTP
 		target = socket.getaddrinfo("ca.pool.ntp.org", 123)[0][4]
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		sock.bind(("0.0.0.0", 0))
@@ -84,13 +77,14 @@ def get_ntp_time():
 		receivetime = fields[9]
 		transmittime = fields[10]
 		
-		localmidpoint = (int((startclock + endclock) / 2.0 * float(2**32)) + 2208988800 * 2**32) & ((1 << 64) - 1)
+		elapsedclock = endclock - startclock
 		servermidpoint = (transmittime + receivetime) // 2
-		offset = (localmidpoint - servermidpoint) / float(2**32)
-		return "{:.6f}".format(offset)
-	except:
-		return '"Error"'
-	finally:
+		correctedtime = (servermidpoint + int(elapsedclock / 2.0 * float(2**32))) * 1000 // 2**32 - 2208988800000
+		return json.dumps(["ntp", correctedtime])
+		
+	except:  # Fall back to this web server's time
+		return json.dumps(["server", round(time.time() * 1000)])
+	finally:  # Clean up
 		if sock is not None:
 			sock.close()
 
