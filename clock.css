@@ -51,22 +51,18 @@ html {
 /*---- Clock module ----*/
 
 #clock {
-	display: table;
 	position: absolute;
 	width: 100%;
 	height: 100%;
 	background-size: cover;
 	background-position: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 #clock-timebox {
-	display: table-row;
-	height: 100%;
-}
-
-#clock-timebox > div {
-	display: table-cell;
-	vertical-align: middle;
+	padding-bottom: 1.5em;
 	text-align: center;
 }
 
@@ -74,11 +70,11 @@ html {
 	font-family: "Swiss 721 BT Rounded", "Swiss 721 BT", sans-serif;
 	font-weight: 800;
 	color: #A8A8A8;
-	font-size: 650%;
+	font-size: 690%;
 	text-shadow: 0.023em 0.023em 0.023em #202020;
 }
 
-#clock-time-wrapper, #clock-utc {
+#clock-time-wrapper, #clock-utcbox {
 	font-kerning: none;
 }
 
@@ -93,48 +89,36 @@ html {
 }
 
 #clock-date {
-	margin-top: 0.3em;
+	margin-top: 0.2em;
 	font-size: 200%;
 	font-weight: 400;
 }
 
 #clock-weatherbox {
-	display: table;
-	width: 100%;
-	height: 0.1%;
+	position: absolute;
+	right: 1vw;
+	bottom: 1vw;
 	font-weight: 100;
 	font-size: 70%;
+	letter-spacing: 0.01em;
 }
 
-#clock-weatherbox > div {
-	display: table-cell;
-	vertical-align: bottom;
-}
-
-#clock-weather {
-	padding-bottom: 0.4em;
-}
-
-#clock-utc {
-	padding-left: 0.4em;
-	padding-bottom: 0.267em;
+#clock-utcbox {
+	position: absolute;
+	left: 1vw;
+	bottom: 1vw;
 	text-align: left;
-	font-size: 150%;
+	font-weight: 100;
+	letter-spacing: 0.01em;
 }
 
-#clock-weather-temperature, #clock-utc {
+#clock-weather-temperature, #clock-utcbox {
 	white-space: nowrap;
 }
 
-#clock-weather a {
+#clock-weatherbox a {
 	color: inherit;
 	text-decoration: none;
-}
-
-#clock-weather {
-	padding-right: 0.6em;
-	text-align: right;
-	letter-spacing: 0.01em;
 }
 
 #clock-weather-temperature {
@@ -154,7 +138,8 @@ html {
 
 #admin-gear {
 	position: absolute;
-	right: 0em;
+	top: 0;
+	right: 0;
 	width: 1.2em;
 	padding: 0.4em 0.4em 0.2em 0.2em;
 	opacity: 0.7;
