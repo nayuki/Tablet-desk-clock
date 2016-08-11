@@ -1,7 +1,7 @@
 /* 
  * Tablet desk clock
  * 
- * Copyright (c) 2015 Project Nayuki
+ * Copyright (c) 2016 Project Nayuki
  * All rights reserved. Contact Nayuki for licensing.
  * https://www.nayuki.io/page/tablet-desk-clock
  */
@@ -29,21 +29,22 @@ html {
 	cursor: pointer;
 }
 
-.showing {
+@keyframes fadein {
+	from { opacity: 0.0; }
+	to { opacity: 1.0; }
+}
+
+.showing, .hiding {
 	animation-fill-mode: both;
 	animation-name: fadein;
+}
+
+.showing {
 	animation-direction: normal;
 }
 
 .hiding {
-	animation-fill-mode: both;
-	animation-name: fadein;
 	animation-direction: reverse;
-}
-
-@keyframes fadein {
-	from { opacity: 0.0; }
-	to { opacity: 1.0; }
 }
 
 
