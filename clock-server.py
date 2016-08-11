@@ -1,24 +1,21 @@
 # 
 # Tablet desk clock
 # 
-# Copyright (c) 2015 Project Nayuki
+# Copyright (c) 2016 Project Nayuki
 # All rights reserved. Contact Nayuki for licensing.
 # https://www.nayuki.io/page/tablet-desk-clock
 # 
-# Run this web server script with no arguments. For Python 2 and 3.
+# Run this web server script with no arguments. For Python 3+.
 # Open web browser and visit: http://localhost:51367/
 # 
 
 
 # ---- Prelude ----
 
-import bottle, datetime, json, os, random, re, sqlite3, sys, time, xml.etree.ElementTree
-if sys.version_info.major == 2:
-    python_version = 2
-    import urllib2
-else:
-	python_version = 3
-	import urllib.request
+import sys
+if sys.version_info[ : 3] < (3, 0, 0):
+	raise RuntimeError("Requires Python 3+")
+import bottle, datetime, json, os, random, re, sqlite3, time, urllib.request, xml.etree.ElementTree
 
 
 # ---- Static file serving ----
@@ -116,10 +113,7 @@ def get_wallpaper_candidates():
 	if not os.path.isdir(dir):
 		return []
 	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))
-	items = filter(cond, os.listdir(dir))
-	if python_version == 3:
-		items = list(items)
-	return items
+	return [name for name in os.listdir(dir) if cond(name)]
 
 
 # ---- Weather module ----
@@ -134,7 +128,7 @@ def weather():
 		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
 		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
-		stream = (urllib.request if python_version == 3 else urllib2).urlopen(url=url, timeout=60)
+		stream = urllib.request.urlopen(url=url, timeout=60)
 		xmlstr = stream.read()
 		stream.close()
 		
@@ -182,11 +176,8 @@ def morning_reminders():
 		bottle.response.set_header("Cache-Control", "no-cache")
 		return json.dumps(morning_reminders)
 	elif bottle.request.method == "POST":
-		data = bottle.request.body.read()
-		if python_version == 3:
-			data = data.decode("UTF-8")
-		data = json.loads(data)
-		morning_reminders.update(data)
+		data = bottle.request.body.read().decode("UTF-8")
+		morning_reminders.update(json.loads(data))
 		return "Success"
 
 morning_reminders = {}
