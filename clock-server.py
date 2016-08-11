@@ -15,7 +15,7 @@
 import sys
 if sys.version_info[ : 3] < (3, 0, 0):
 	raise RuntimeError("Requires Python 3+")
-import bottle, datetime, json, os, random, re, sqlite3, time, urllib.request, xml.etree.ElementTree
+import bottle, datetime, json, os, random, re, socket, sqlite3, struct, time, urllib.request, xml.etree.ElementTree
 
 
 # ---- Static file serving ----
@@ -55,6 +55,44 @@ def gettime():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	return str(round(time.time() * 1000))
+
+
+@bottle.route("/ntp-time.json")
+def get_ntp_time():
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	
+	sock = None
+	try:
+		target = socket.getaddrinfo("ca.pool.ntp.org", 123)[0][4]
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.bind(("0.0.0.0", 0))
+		sock.settimeout(1.0)
+		
+		startclock = time.time()
+		sock.sendto(bytes([0x1B] + [0] * 47), target)
+		packet = sock.recv(100)
+		endclock = time.time()
+		
+		fields = struct.unpack(">BBBBIIIQQQQ", packet)
+		header = fields[0]
+		leap = header >> 6
+		version = (header >> 3) & 7
+		mode = header & 7
+		if leap == 3 or version != 3 or mode != 4:
+			raise ValueError("Response contains invalid data")
+		receivetime = fields[9]
+		transmittime = fields[10]
+		
+		localmidpoint = (int((startclock + endclock) / 2.0 * float(2**32)) + 2208988800 * 2**32) & ((1 << 64) - 1)
+		servermidpoint = (transmittime + receivetime) // 2
+		offset = (localmidpoint - servermidpoint) / float(2**32)
+		return "{:.6f}".format(offset)
+	except:
+		return '"Error"'
+	finally:
+		if sock is not None:
+			sock.close()
 
 
 # Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png"
