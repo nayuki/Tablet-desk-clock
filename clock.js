@@ -177,21 +177,21 @@ var adminModule = new function() {
 	
 	// Toggles whether the admin pane is shown or hidden.
 	function togglePane() {
-		if (!isAnimating) {
-			isAnimating = true;
-			if (adminContentElem.style.display == "none") {
-				adminContentElem.className = "showing";
-				adminContentElem.style.display = "block";
-				setTimeout(function() {
-					adminContentElem.className = "";
-					isAnimating = false; }, 150);  // Must be a bit larger than the number declared in CSS
-			} else {
-				adminContentElem.className = "hiding";
-				setTimeout(function() {
-					adminContentElem.style.display = "none";
-					adminContentElem.className = "";
-					isAnimating = false; }, 350);  // Must be a bit larger than the number declared in CSS
-			}
+		if (isAnimating)
+			return;
+		isAnimating = true;
+		if (adminContentElem.style.display == "none") {
+			adminContentElem.className = "showing";
+			adminContentElem.style.display = "block";
+			setTimeout(function() {
+				adminContentElem.className = "";
+				isAnimating = false; }, 150);  // Must be a bit larger than the number declared in CSS
+		} else {
+			adminContentElem.className = "hiding";
+			setTimeout(function() {
+				adminContentElem.style.display = "none";
+				adminContentElem.className = "";
+				isAnimating = false; }, 350);  // Must be a bit larger than the number declared in CSS
 		}
 	}
 	
@@ -278,10 +278,10 @@ var weatherModule = new function() {
 
 var morningModule = new function() {
 	var morningElem = document.getElementById("morning");
-	var greetingSpans = morningElem.getElementsByTagName("h1")[0].getElementsByTagName("span");
 	var remindersElem = document.getElementById("morning-reminders");
 	
 	function showMorning() {
+		var greetingSpans = document.querySelectorAll("#morning h1 span");
 		var msgIndex = Math.floor(Math.random() * greetingSpans.length);
 		for (var i = 0; i < greetingSpans.length; i++)
 			greetingSpans[i].style.display = i == msgIndex ? "inline" : "none";
@@ -316,11 +316,10 @@ var morningModule = new function() {
 	
 	function doMorningRequest() {
 		getAndProcessJson("/morning-reminders.json", 3000, 0, function(data) {
-			if (typeof data != "object") {
-				clearMessages();
+			clearMessages();
+			if (typeof data != "object")
 				addMessage("(Error)");
-			} else {
-				clearMessages();
+			else {
 				// For example, key = "20151231"
 				var d = getCorrectedDatetime();
 				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") +
@@ -329,10 +328,7 @@ var morningModule = new function() {
 					var msgs = data[key];
 					if (msgs.length == 0)
 						addMessage("(None)");
-					else {
-						for (var i = 0; i < msgs.length; i++)
-							addMessage(msgs[i]);
-					}
+					msgs.forEach(addMessage);
 				} else
 					addMessage("(Data missing)");
 			}
