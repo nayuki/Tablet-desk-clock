@@ -20,6 +20,7 @@ import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threadin
 
 # ---- Static file serving ----
 
+web_root_dir = "web"
 authorized_static_files = set()
 
 @bottle.route("/")
@@ -30,14 +31,14 @@ def index():
 def static_file(path):
 	if path not in authorized_static_files:
 		authorized_static_files.clear()
-		scan_static_files("web", "")
+		scan_static_files(web_root_dir, "")
 	if path in authorized_static_files:
 		mime = "auto"
 		for ext in MIME_TYPES:
 			if path.endswith("." + ext):
 				mime = MIME_TYPES[ext]
 				break
-		return bottle.static_file(path, root="web", mimetype=mime)
+		return bottle.static_file(path, root=web_root_dir, mimetype=mime)
 	else:
 		bottle.abort(404)
 
@@ -147,7 +148,7 @@ def get_wallpaper():
 
 
 def get_wallpaper_candidates():
-	dir = os.path.join("web", "wallpapers")
+	dir = os.path.join(web_root_dir, "wallpapers")
 	if not os.path.isdir(dir):
 		return []
 	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))
