@@ -32,10 +32,10 @@ def static_file(path):
 			if path.endswith("." + ext):
 				mime = MIME_TYPES[ext]
 				break
-		return bottle.static_file(path, root=".", mimetype=mime)
+		return bottle.static_file(path, root="web", mimetype=mime)
 	# Wallpaper file names must be 1 to 80 characters of {A-Z, a-z, 0-9, hyphen, underscore}, with a .png or .jpg lowercase extension
 	elif re.match(r"wallpapers/[A-Za-z0-9_-]{1,80}\.(jpg|png)", path) is not None:
-		return bottle.static_file(path, root=".")
+		return bottle.static_file(path, root="web")
 	else:
 		bottle.abort(404)
 
@@ -141,7 +141,7 @@ def get_wallpaper():
 
 
 def get_wallpaper_candidates():
-	dir = "wallpapers"
+	dir = os.path.join("web", "wallpapers")
 	if not os.path.isdir(dir):
 		return []
 	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))
