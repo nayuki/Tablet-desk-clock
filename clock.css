@@ -69,7 +69,7 @@ a:not([href]) {
 }
 
 #clock-timebox {
-	padding-bottom: 1.5em;
+	padding-bottom: 1.0em;
 	text-align: center;
 }
 
@@ -96,7 +96,6 @@ a:not([href]) {
 }
 
 #clock-date {
-	margin-top: 0.2em;
 	font-size: 200%;
 	font-weight: 400;
 }
@@ -109,10 +108,11 @@ a:not([href]) {
 
 #clock-statusbox img {
 	width: 1.2em;
-	margin-right: 0.15em;
+	margin-right: 0.2em;
 	padding: 0.15em;
-	border-radius: 0.1em;
-	background-color: rgba(255,255,255,0.6);
+	border-radius: 0.2em;
+	background-color: #FFFFFF;
+	opacity: 0.3;
 }
 
 #clock-weatherbox {
@@ -163,15 +163,15 @@ a:not([href]) {
 
 #admin-content {
 	box-sizing: padding-box;
-	padding: 1.5em;
+	padding: 1.3em;
 }
 
 #admin-content > div {
 	box-sizing: padding-box;
 	width: 100%;
 	height: 100%;
-	padding: 1em;
-	border-radius: 1em;
+	padding: 0.8em;
+	border-radius: 0.8em;
 	background-color: #FFFFFF;
 	color: #000000;
 }
@@ -189,8 +189,9 @@ a:not([href]) {
 #admin-content a {
 	display: inline-block;
 	padding: 0.47em 0.50em 0.33em;
-	border-radius: 0.6em;
-	background-color: #F0F0F0;
+	border: 0.06em solid #E8E8E8;
+	border-radius: 0.4em;
+	background-color: #F4F4F4;
 	color: inherit;
 }
 
