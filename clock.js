@@ -47,14 +47,16 @@ Date.prototype.clone = function() {
 
 
 // Performs an XHR on the given URL, and calls the given function with the parsed JSON data if data was successful obtained.
-function getAndProcessJson(url, timeout, retryCount, func) {
+function getAndProcessJson(url, timeout, func, retryCount) {
+	if (retryCount === undefined)
+		retryCount = 0;
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function() {
 		func(JSON.parse(xhr.response));
 	};
 	xhr.ontimeout = function() {
 		if (retryCount < 9)  // Exponential back-off
-			setTimeout(function() { getAndProcessJson(url, timeout, retryCount + 1, func); }, Math.pow(2, retryCount) * 1000);
+			setTimeout(function() { getAndProcessJson(url, timeout, func, retryCount + 1); }, Math.pow(2, retryCount) * 1000);
 	};
 	xhr.open("GET", url, true);
 	xhr.responseType = "text";
@@ -88,7 +90,7 @@ var timeModule = new function() {
 	};
 	
 	function autoUpdateTimeOffset() {
-		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
+		getAndProcessJson("/get-time.json", 1000, function(data) {
 			timeOffset = data[1] - Date.now();
 			if (data[0] == "ntp")
 				document.getElementById("clock-status-no-clock").style.display = "none";
@@ -138,7 +140,7 @@ var clockModule = new function() {
 	
 	// Updates the clock wallpaper once. Type is either "get" or "random".
 	var changeWallpaper = this.changeWallpaper = function(type) {
-		getAndProcessJson("/" + type + "-wallpaper.json", 3000, 0, function(data) {
+		getAndProcessJson("/" + type + "-wallpaper.json", 3000, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
 				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')";
@@ -163,7 +165,7 @@ var clockModule = new function() {
 	}
 	
 	function autoUpdateNetworkStatus() {
-		getAndProcessJson("/network-status.json", 60000, 0, function(data) {
+		getAndProcessJson("/network-status.json", 60000, function(data) {
 			if (data[0] === true)
 				document.getElementById("clock-status-no-internet").style.display = "none";
 			else if (data[0] === false)
@@ -264,7 +266,7 @@ var weatherModule = new function() {
 	
 	// Updates the weather display once.
 	var doWeatherRequest = this.doWeatherRequest = function() {
-		getAndProcessJson("/weather.json", 10000, 0, function(data) {
+		getAndProcessJson("/weather.json", 10000, function(data) {
 			if (typeof data != "object") {
 				sunrisesetTextNode.data = "";
 				temperatureTextNode.data = "";
@@ -348,7 +350,7 @@ var morningModule = new function() {
 	}
 	
 	function doMorningRequest() {
-		getAndProcessJson("/morning-reminders.json", 3000, 0, function(data) {
+		getAndProcessJson("/morning-reminders.json", 3000, function(data) {
 			clearMessages();
 			if (typeof data != "object")
 				addMessage("(Error)");
