@@ -9,10 +9,13 @@
 
 /*---- Whole page ----*/
 
-html, body {
-	height: 100%;
+html, body, h1, h2, p, ul, li {
 	margin: 0;
 	padding: 0;
+}
+
+html, body {
+	height: 100%;
 }
 
 html {
@@ -173,13 +176,8 @@ a:not([href]) {
 	color: #000000;
 }
 
-#admin-content ul, #admin-content li {
-	margin: 0;
-	padding: 0;
-	list-style-type: none;
-}
-
 #admin-content ul {
+	list-style-type: none;
 	font-size: 90%;
 }
 
@@ -227,8 +225,6 @@ a:not([href]) {
 }
 
 #morning h1 {
-	margin-top: 0em;
-	margin-bottom: 0em;
 	padding-bottom: 0.2em;
 	border-bottom: 0.06em solid #EDBB34;
 	font-size: 130%;
@@ -245,15 +241,12 @@ a:not([href]) {
 }
 
 #morning ul {
-	margin: 0em;
 	margin-left: 1.5em;
-	padding: 0em;
 	flex-grow: 1;
 }
 
 #morning li {
 	margin: 0.5em 0em;
-	padding: 0em;
 }
 
 #morning li:first-child {
@@ -261,7 +254,6 @@ a:not([href]) {
 }
 
 #morning-sunriseset {
-	margin: 0;
 	text-align: center;
 }
 
