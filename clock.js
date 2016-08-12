@@ -315,7 +315,7 @@ var morningModule = new function() {
 		addMessage("(Loading...)");
 		doMorningRequest();
 		
-		morningElem.style.display = "table";
+		morningElem.style.removeProperty("display");
 		scheduleNextMorning();
 		setTimeout(hideMorning, 5 * 3600 * 1000);
 	}
