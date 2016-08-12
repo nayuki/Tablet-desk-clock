@@ -177,7 +177,7 @@ var clockModule = new function() {
 			data.forEach(function(val, i) {
 				if (i >= 1) {
 					var imgElem = document.createElement("img");
-					imgElem.src = val + "-computer-icon.svg";
+					imgElem.src = "icon/" + val + "-computer.svg";
 					containerElem.appendChild(imgElem);
 				}
 			});
