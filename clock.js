@@ -40,29 +40,10 @@ function twoDigits(n) {
 	return (n < 10 ? "0" : "") + n;
 }
 
-
-var timeOffset = 0;  // Server time minus client time, useful if client is a different machine and is inaccurate
-
-// Returns the server's current time as a Date object.
-function getCorrectedDatetime() {
-	return new Date(Date.now() + timeOffset);
-}
-
 // Monkey patching
 Date.prototype.clone = function() {
 	return new Date(this.getTime());
 };
-
-
-// Calls the given function strictly at or after the given wakeup datetime (i.e. getCorrectedDatetime().getTime() >= wake.getTime()).
-// The given function may be called immediately synchronously or asynchronously later.
-function scheduleCall(func, wake) {
-	var delay = wake.getTime() - getCorrectedDatetime().getTime();
-	if (delay <= 0)
-		func();
-	else
-		setTimeout(function() { scheduleCall(func, wake); }, delay);
-}
 
 
 // Performs an XHR on the given URL, and calls the given function with the parsed JSON data if data was successful obtained.
@@ -82,6 +63,48 @@ function getAndProcessJson(url, timeout, retryCount, func) {
 }
 
 
+/*---- Time module ----*/
+
+var timeModule = new function() {
+	var self = this;
+	
+	// Represents the best known correct time minus the web browser's time, in milliseconds.
+	// The time source may be the web server itself or from NTP (passed through the web server).
+	var timeOffset = 0;
+	
+	// Returns a new Date object represented the current date and time, with corrections applied based on the server's time.
+	this.getCorrectedDatetime = function() {
+		return new Date(Date.now() + timeOffset);
+	};
+	
+	// Calls the given function at or after the given wakeup datetime (i.e. getCorrectedDatetime().getTime() >= wake.getTime()).
+	// The given function may be called immediately synchronously or asynchronously later.
+	this.scheduleCall = function(func, wake) {
+		var delay = wake.getTime() - self.getCorrectedDatetime().getTime();
+		if (delay <= 0)
+			func();
+		else
+			setTimeout(function() { self.scheduleCall(func, wake); }, delay);
+	};
+	
+	function autoUpdateTimeOffset() {
+		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
+			timeOffset = data[1] - Date.now();
+			if (data[0] == "ntp")
+				document.getElementById("clock-status-no-clock").style.display = "none";
+			else if (data[0] == "server") {
+				document.getElementById("clock-status-no-clock").style.removeProperty("display");
+				if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
+					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
+			}
+		});
+		setTimeout(autoUpdateTimeOffset, 60 * 60 * 1000);
+	}
+	
+	autoUpdateTimeOffset();
+};
+
+
 /*---- Clock module ----*/
 
 var clockModule = new function() {
@@ -96,7 +119,7 @@ var clockModule = new function() {
 	
 	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
-		var d = getCorrectedDatetime();
+		var d = timeModule.getCorrectedDatetime();
 		var curClockUpdate = Math.floor(d.getTime() / 1000);
 		if (prevClockUpdate == null || curClockUpdate != prevClockUpdate) {
 			hourTextNode  .setText(twoDigits(d.getHours  ()));  // Local hour  : "14"
@@ -110,7 +133,7 @@ var clockModule = new function() {
 				twoDigits(d.getDate()) + EN_DASH + DAYS_OF_WEEK[d.getDay()]);
 			prevClockUpdate = curClockUpdate;
 		}
-		setTimeout(autoUpdateClockDisplay, 1000 - getCorrectedDatetime().getTime() % 1000);
+		setTimeout(autoUpdateClockDisplay, 1000 - timeModule.getCorrectedDatetime().getTime() % 1000);
 	}
 	
 	// Updates the clock wallpaper once. Type is either "get" or "random".
@@ -128,7 +151,7 @@ var clockModule = new function() {
 		changeWallpaper("get");
 		
 		// Schedule next update at 05:00 local time
-		var now = getCorrectedDatetime();
+		var now = timeModule.getCorrectedDatetime();
 		var next = now.clone();
 		next.setHours(5);
 		next.setMinutes(0);
@@ -136,7 +159,7 @@ var clockModule = new function() {
 		next.setMilliseconds(0);
 		if (next.getTime() <= now.getTime())
 			next.setDate(next.getDate() + 1);
-		scheduleCall(autoUpdateWallpaper, next);
+		timeModule.scheduleCall(autoUpdateWallpaper, next);
 	}
 	
 	function autoUpdateNetworkStatus() {
@@ -160,20 +183,6 @@ var clockModule = new function() {
 		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000);
 	}
 	
-	// Updates the server-versus-client time offset at startup only
-	function updateTimeOffset() {
-		getAndProcessJson("/get-time.json", 1000, 0, function(data) {
-			timeOffset = data[1] - Date.now();
-			if (data[0] == "ntp")
-				document.getElementById("clock-status-no-clock").style.display = "none";
-			else if (data[0] == "server") {
-				document.getElementById("clock-status-no-clock").style.removeProperty("display");
-				if (Math.abs(timeOffset) < 50)  // Heuristic for detecting local server
-					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
-			}
-		});
-	}
-	
 	// A wrapper class around a DOM text node to avoid pushing unnecessary value updates to the DOM.
 	function MemoizingTextNode(elemId) {
 		var textNode = getChildTextNode(elemId);
@@ -189,7 +198,6 @@ var clockModule = new function() {
 	// Initialization
 	autoUpdateClockDisplay();
 	autoUpdateWallpaper();
-	updateTimeOffset();
 	setTimeout(autoUpdateNetworkStatus, 5000);
 };
 
@@ -265,7 +273,7 @@ var weatherModule = new function() {
 				sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
 				conditionTextNode.data = data["condition"];
 				temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
-				var d = getCorrectedDatetime();
+				var d = timeModule.getCorrectedDatetime();
 				getChildTextNode("admin-last-weather").data = twoDigits(d.getHours()) + ":" + twoDigits(d.getMinutes());
 			}
 			weatherTextIsSet = true;
@@ -284,14 +292,14 @@ var weatherModule = new function() {
 		doWeatherRequest();
 		
 		// Schedule next update at about 5 minutes past the hour
-		var now = getCorrectedDatetime();
+		var now = timeModule.getCorrectedDatetime();
 		var next = now.clone();
 		next.setMinutes(4);
 		next.setSeconds(0);
 		next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Deliberate jitter of 2 minutes
 		if (next.getTime() < now.getTime() || next.getHours() == now.getHours() && now.getMinutes() >= 4)
 			next.setHours(next.getHours() + 1);
-		scheduleCall(autoUpdateWeather, next);
+		timeModule.scheduleCall(autoUpdateWeather, next);
 	}
 	
 	// Initialization
@@ -346,7 +354,7 @@ var morningModule = new function() {
 				addMessage("(Error)");
 			else {
 				// For example, key = "20151231"
-				var d = getCorrectedDatetime();
+				var d = timeModule.getCorrectedDatetime();
 				var key = d.getFullYear() + (d.getMonth() + 1 < 10 ? "0" : "") +
 					(d.getMonth() + 1) + (d.getDate() < 10 ? "0" : "") + d.getDate();
 				if (key in data) {
@@ -362,7 +370,7 @@ var morningModule = new function() {
 	
 	// Shows the morning data every day at 07:00
 	function scheduleNextMorning() {
-		var now = getCorrectedDatetime();
+		var now = timeModule.getCorrectedDatetime();
 		var next = now.clone();
 		next.setHours(7);
 		next.setMinutes(0);
@@ -370,7 +378,7 @@ var morningModule = new function() {
 		next.setMilliseconds(0);
 		if (next.getTime() < now.getTime())
 			next.setDate(next.getDate() + 1);
-		scheduleCall(showMorning, next);
+		timeModule.scheduleCall(showMorning, next);
 	}
 	
 	// Initialization
