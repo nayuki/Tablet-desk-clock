@@ -148,7 +148,7 @@ def get_wallpaper():
 
 
 def get_wallpaper_candidates():
-	dir = os.path.join(web_root_dir, "wallpapers")
+	dir = os.path.join(web_root_dir, "wallpaper")
 	if not os.path.isdir(dir):
 		return []
 	cond = lambda name: os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))

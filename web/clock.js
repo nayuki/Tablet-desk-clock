@@ -143,7 +143,7 @@ var clockModule = new function() {
 		getAndProcessJson("/" + type + "-wallpaper.json", 3000, function(data) {
 			if (typeof data == "string") {
 				var clockElem = document.getElementById("clock");
-				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpapers/" + data + "')";
+				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpaper/" + data + "')";
 			}
 		});
 	};
