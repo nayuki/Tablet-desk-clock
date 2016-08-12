@@ -20,31 +20,37 @@ import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threadin
 
 # ---- Static file serving ----
 
+authorized_static_files = set()
+
 @bottle.route("/")
 def index():
 	bottle.redirect("clock.html", 301)
 
 @bottle.route("/<path:path>")
 def static_file(path):
-	if path in AUTHORIZED_STATIC_FILES:
+	if path not in authorized_static_files:
+		authorized_static_files.clear()
+		scan_static_files("web", "")
+	if path in authorized_static_files:
 		mime = "auto"
 		for ext in MIME_TYPES:
 			if path.endswith("." + ext):
 				mime = MIME_TYPES[ext]
 				break
 		return bottle.static_file(path, root="web", mimetype=mime)
-	# Wallpaper file names must be 1 to 80 characters of {A-Z, a-z, 0-9, hyphen, underscore}, with a .png or .jpg lowercase extension
-	elif re.match(r"wallpapers/[A-Za-z0-9_-]{1,80}\.(jpg|png)", path) is not None:
-		return bottle.static_file(path, root="web")
 	else:
 		bottle.abort(404)
 
-AUTHORIZED_STATIC_FILES = [
-	"clock.css", "clock.html", "clock.js",
-	"desktop-computer-icon.svg", "gear-icon.svg", "laptop-computer-icon.svg", "no-clock-icon.svg", "no-internet-icon.svg", "picture-icon.svg", "reload-icon.svg", "server-computer-icon.svg", "weather-icon.svg",
-	"swiss-721-bt-bold.ttf", "swiss-721-bt-bold-round.ttf", "swiss-721-bt-light.ttf", "swiss-721-bt-medium.ttf", "swiss-721-bt-normal.ttf", "swiss-721-bt-thin.ttf",
-]
 MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
+
+def scan_static_files(fspath, webpath):
+	if os.path.isfile(fspath):
+		authorized_static_files.add(webpath)
+	elif os.path.isdir(fspath):
+		if webpath != "":
+			webpath += "/"
+		for name in os.listdir(fspath):
+			scan_static_files(os.path.join(fspath, name), webpath + name)
 
 
 # ---- Clock module ----
