@@ -1,4 +1,6 @@
 {
+	"canada-weather-xml-url": "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml",
+	
 	"local-test-computers": {
 		"desktop": [],
 		"laptop": [],

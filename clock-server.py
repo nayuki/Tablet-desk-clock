@@ -222,7 +222,7 @@ def weather():
 		# Data provided by Environment Canada. Documentation:
 		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
-		url = "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml"  # Toronto, Ontario
+		url = configuration["canada-weather-xml-url"]
 		stream = urllib.request.urlopen(url=url, timeout=60)
 		xmlstr = stream.read()
 		stream.close()
