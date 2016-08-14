@@ -214,7 +214,7 @@ def network_status():
 # ---- Weather module ----
 
 # Yields an object containing weather and sunrise data, e.g.:
-# {"condition":"Mostly Cloudy", "temperature":"-2.5", "sunrise":"07:30", "sunset":"18:42"}
+# {"condition":"Mostly Cloudy", "temperature":"-2.5", "sunrise":"07:30", "sunset":"18:42", "location":"Toronto, Ontario, Canada"}
 @bottle.route("/weather.json")
 def weather():
 	global weather_cache
@@ -230,6 +230,7 @@ def weather():
 		# Parse data and build result
 		root = xml.etree.ElementTree.fromstring(xmlstr)
 		result = {
+			"location"   : root.findtext("./location/name") + ", " + root.findtext("./location/province") + ", " + root.findtext("./location/country"),
 			"condition"  : root.findtext("./currentConditions/condition"),
 			"temperature": root.findtext("./currentConditions/temperature"),
 		}

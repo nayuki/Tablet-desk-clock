@@ -272,6 +272,7 @@ var weatherModule = new function() {
 				temperatureTextNode.data = "";
 				conditionTextNode.data = "(Weather: Data error)";
 			} else {
+				document.getElementById("clock-weatherbox").title = data["location"];
 				sunrisesetTextNode.data = SUN_CHAR + " " + data["sunrise"] + " ~ " + data["sunset"] + " " + MOON_CHAR;
 				conditionTextNode.data = data["condition"];
 				temperatureTextNode.data = Math.round(parseFloat(data["temperature"])).toString().replace("-", MINUS_CHAR) + QUARTER_EM_SPACE + DEGREE_CHAR + "C";
