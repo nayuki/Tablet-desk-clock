@@ -20,12 +20,20 @@ import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threadin
 
 # ---- Static file serving ----
 
-web_root_dir = "web"
-authorized_static_files = set()
-
 @bottle.route("/")
 def index():
 	bottle.redirect("clock.html", 301)
+
+
+web_root_dir = "web"
+
+MIME_TYPES = {
+	"html": "application/xhtml+xml",
+	"svg" : "image/svg+xml",
+	"ttf" : "application/x-font-ttf",
+}
+
+authorized_static_files = set()
 
 @bottle.route("/<path:path>")
 def static_file(path):
@@ -42,7 +50,6 @@ def static_file(path):
 	else:
 		bottle.abort(404)
 
-MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
 
 def _scan_static_files(fspath, webpath):
 	if os.path.isfile(fspath):
