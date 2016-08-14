@@ -130,24 +130,33 @@ def get_wallpaper():
 	
 	con = sqlite3.connect("wallpaper-history.sqlite")
 	try:
+		# Ensure there is a table
 		cur = con.cursor()
 		cur.execute("CREATE TABLE IF NOT EXISTS wallpaper_history(date VARCHAR NOT NULL, filename VARCHAR NOT NULL)")
 		con.commit()
 		
+		# See if there's already an entry for today
 		today = datetime.date.today().strftime("%Y%m%d")
 		cur.execute("SELECT filename FROM wallpaper_history WHERE date=?", (today,))
 		data = cur.fetchone()
 		if data is not None:
 			return _json_response(data[0])
 		
+		# Get all known history of wallpapers
 		cur.execute("SELECT date, filename FROM wallpaper_history ORDER BY date DESC")
 		history = cur.fetchall()
-		maxremove = min(round(len(candidates) * 0.67), len(candidates) - 3)
+		
+		# Remove recently used wallpapers from candidates
+		maxremove = min(round(len(candidates) * 0.67), max(len(candidates) - 3, 0))
 		for row in history[ : maxremove]:
 			candidates.discard(row[1])
-		maxhistory = 300
+		
+		# Purge old history of wallpapers to save space
+		maxhistory = 1000
 		if len(history) > maxhistory:
 			cur.execute("DELETE FROM wallpaper_history WHERE date <= ?", (history[maxhistory][0],))
+		
+		# Choose today's wallpaper and save it
 		result = random.choice(list(candidates))
 		cur.execute("INSERT INTO wallpaper_history VALUES(?, ?)", (today, result))
 		con.commit()
