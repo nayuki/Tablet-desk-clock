@@ -301,4 +301,4 @@ morning_reminders = {}
 if __name__ == "__main__":
 	with open("config.json", "r", encoding="UTF-8") as f:
 		configuration = json.load(f)  # Global variable
-	bottle.run(host="0.0.0.0", port=51367, reloader=True)
+	bottle.run(host="0.0.0.0", port=configuration["web-server-port"], reloader=True)
