@@ -70,17 +70,14 @@ def _scan_static_files(fspath, webpath):
 # Yields the time source and current Unix millisecond time, e.g.: ["server", 1433185355946] or ["ntp", 1470939694075].
 @bottle.route("/get-time.json")
 def get_time():
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
 	try:  # Try to get time from NTP
 		ntpserv = configuration["ntp-server"]
 		if ntpserv is not None:
-			result = ["ntp", round(_get_ntp_time(ntpserv[0], ntpserv[1]))]
+			return _json_response(["ntp", round(_get_ntp_time(ntpserv[0], ntpserv[1]))])
 		else:
 			raise Exception()
 	except:  # Fall back to this web server's time
-		result = ["server", round(time.time() * 1000)]
-	return json.dumps(result)
+		return _json_response(["server", round(time.time() * 1000)])
 
 
 # Communicates with the given Network Time Protocol server,
@@ -120,20 +117,16 @@ def _get_ntp_time(host, port=123, sock=None):
 # Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png".
 @bottle.route("/random-wallpaper.json")
 def random_wallpaper():
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
 	candidates = _get_wallpaper_candidates()
-	return json.dumps(random.choice(candidates) if len(candidates) > 0 else None)
+	return _json_response(random.choice(candidates) if len(candidates) > 0 else None)
 
 
 # Yields a file name or null, which a wallpaper that changes only once a day (history kept on the server side).
 @bottle.route("/get-wallpaper.json")
 def get_wallpaper():
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
 	candidates = set(_get_wallpaper_candidates())
 	if len(candidates) == 0:
-		return "null"
+		return _json_response(None)
 	
 	con = sqlite3.connect("wallpaper-history.sqlite")
 	try:
@@ -145,7 +138,7 @@ def get_wallpaper():
 		cur.execute("SELECT filename FROM wallpaper_history WHERE date=?", (today,))
 		data = cur.fetchone()
 		if data is not None:
-			return json.dumps(data[0])
+			return _json_response(data[0])
 		
 		cur.execute("SELECT date, filename FROM wallpaper_history ORDER BY date DESC")
 		history = cur.fetchall()
@@ -158,7 +151,7 @@ def get_wallpaper():
 		result = random.choice(list(candidates))
 		cur.execute("INSERT INTO wallpaper_history VALUES(?, ?)", (today, result))
 		con.commit()
-		return json.dumps(result)
+		return _json_response(result)
 		
 	finally:
 		cur.close()
@@ -232,11 +225,7 @@ def network_status():
 		else:
 			raise AssertionError()
 	result.sort(key=key_func)
-	
-	# Prepare the HTTP response
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
-	return json.dumps(result)
+	return _json_response(result)
 
 
 # ---- Weather module ----
@@ -271,10 +260,8 @@ def weather():
 		now = time.time()
 		expire = ((now - 3*60) // 3600 + 1) * 3600 + 3*60  # 3 minutes past the next hour
 		expire = min(now + 20 * 60, expire)  # Or 20 minutes, whichever is earlier
-		weather_cache = (json.dumps(result), expire)
-	bottle.response.content_type = "application/json"
-	bottle.response.set_header("Cache-Control", "no-cache")
-	return weather_cache[0]
+		weather_cache = (result, expire)
+	return _json_response(weather_cache[0])
 
 weather_cache = None  # Either None or a tuple of (JSON string, expiration time)
 
@@ -294,15 +281,21 @@ def morning_reminders():
 				todelete.append(key)
 		for key in todelete:
 			del morning_reminders[key]
-		bottle.response.content_type = "application/json"
-		bottle.response.set_header("Cache-Control", "no-cache")
-		return json.dumps(morning_reminders)
+		return _json_response(morning_reminders)
 	elif bottle.request.method == "POST":
 		data = bottle.request.body.read().decode("UTF-8")
 		morning_reminders.update(json.loads(data))
-		return "Success"
+		return "Success"  # Plain text, not JSON
 
 morning_reminders = {}
+
+
+# ---- Miscellaneous ----
+
+def _json_response(data):
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	return json.dumps(data)
 
 
 # ---- Server initialization ----
