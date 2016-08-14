@@ -65,17 +65,30 @@ def _scan_static_files(fspath, webpath):
 
 # Yields the time source and current Unix millisecond time, e.g.: ["server", 1433185355946] or ["ntp", 1470939694075].
 @bottle.route("/get-time.json")
-def gettime():
+def get_time():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
-	
-	sock = None
 	try:  # Try to get time from NTP
-		target = socket.getaddrinfo("ca.pool.ntp.org", 123)[0][4]
+		result = ["ntp", round(_get_ntp_time("ca.pool.ntp.org"))]
+	except:  # Fall back to this web server's time
+		result = ["server", round(time.time() * 1000)]
+	return json.dumps(result)
+
+
+# Communicates with the given Network Time Protocol server,
+# either returning an integer Unix millisecond time or raising an IOError.
+def _get_ntp_time(host, port=123, sock=None):
+	if sock is None:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		sock.bind(("0.0.0.0", 0))
-		sock.settimeout(1.0)
-		
+		try:
+			sock.bind(("0.0.0.0", 0))
+			sock.settimeout(1.0)
+			return _get_ntp_time(host, port, sock)
+		finally:
+			sock.close()
+	
+	else:
+		target = socket.getaddrinfo(host, port)[0][4]
 		startclock = time.time()
 		sock.sendto(bytes([0x1B] + [0] * 47), target)
 		packet = sock.recv(100)
@@ -93,14 +106,7 @@ def gettime():
 		
 		elapsedclock = endclock - startclock
 		servermidpoint = (transmittime + receivetime) // 2
-		correctedtime = (servermidpoint + int(elapsedclock / 2.0 * float(2**32))) * 1000 // 2**32 - 2208988800000
-		return json.dumps(["ntp", correctedtime])
-		
-	except:  # Fall back to this web server's time
-		return json.dumps(["server", round(time.time() * 1000)])
-	finally:  # Clean up
-		if sock is not None:
-			sock.close()
+		return (servermidpoint + int(elapsedclock / 2.0 * float(2**32))) * 1000 // 2**32 - 2208988800000
 
 
 # Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png"
