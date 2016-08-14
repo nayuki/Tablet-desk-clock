@@ -10,12 +10,9 @@
 /*---- Whole page ----*/
 
 html, body, h1, h2, p, ul, li {
+	/* Reset some browser defaults */
 	margin: 0;
 	padding: 0;
-}
-
-html, body {
-	height: 100%;
 }
 
 html {
@@ -28,16 +25,25 @@ html {
 	-moz-user-select: none;  /* Accidental text selection on touchscreens is annoying */
 }
 
+html, body {
+	/* Full-screen web page */
+	height: 100%;
+}
+
 article {
+	/* Full-screen content pages */
 	position: absolute;
 	width: 100%;
 	height: 100%;
 }
 
-a:not([href]) {
+a:not([href]) {  /* JavaScript buttons */
 	text-decoration: none;
 	cursor: pointer;
 }
+
+
+/* Shared animations */
 
 @keyframes fadein {
 	from { opacity: 0.0; }
