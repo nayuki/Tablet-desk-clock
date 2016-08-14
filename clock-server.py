@@ -43,11 +43,12 @@ def static_file(path):
 		authorized_static_files.clear()
 		_scan_static_files(web_root_dir, "")
 	if path in authorized_static_files:
-		mime = "auto"
 		for ext in MIME_TYPES:
 			if path.endswith("." + ext):
 				mime = MIME_TYPES[ext]
 				break
+		else:
+			mime = "auto"
 		return bottle.static_file(path, root=web_root_dir, mimetype=mime)
 	else:
 		bottle.abort(404)
@@ -122,10 +123,7 @@ def random_wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	candidates = _get_wallpaper_candidates()
-	if len(candidates) == 0:
-		return "null"
-	else:
-		return '"' + random.choice(candidates) + '"'
+	return json.dumps(random.choice(candidates) if len(candidates) > 0 else None)
 
 
 # Yields a file name or null, which a wallpaper that changes only once a day (history kept on the server side).
@@ -137,8 +135,8 @@ def get_wallpaper():
 	if len(candidates) == 0:
 		return "null"
 	
+	con = sqlite3.connect("wallpaper-history.sqlite")
 	try:
-		con = sqlite3.connect("wallpaper-history.sqlite")
 		cur = con.cursor()
 		cur.execute("CREATE TABLE IF NOT EXISTS wallpaper_history(date VARCHAR NOT NULL, filename VARCHAR NOT NULL)")
 		con.commit()
@@ -147,7 +145,7 @@ def get_wallpaper():
 		cur.execute("SELECT filename FROM wallpaper_history WHERE date=?", (today,))
 		data = cur.fetchone()
 		if data is not None:
-			return '"' + data[0] + '"'
+			return json.dumps(data[0])
 		
 		cur.execute("SELECT date, filename FROM wallpaper_history ORDER BY date DESC")
 		history = cur.fetchall()
@@ -160,7 +158,7 @@ def get_wallpaper():
 		result = random.choice(list(candidates))
 		cur.execute("INSERT INTO wallpaper_history VALUES(?, ?)", (today, result))
 		con.commit()
-		return '"' + result + '"'
+		return json.dumps(result)
 		
 	finally:
 		cur.close()
@@ -252,10 +250,8 @@ def weather():
 		# Data provided by Environment Canada. Documentation:
 		# - http://dd.meteo.gc.ca/about_dd_apropos.txt
 		# - http://dd.weather.gc.ca/citypage_weather/docs/README_citypage_weather.txt
-		url = configuration["canada-weather-xml-url"]
-		stream = urllib.request.urlopen(url=url, timeout=60)
-		xmlstr = stream.read()
-		stream.close()
+		with urllib.request.urlopen(configuration["canada-weather-xml-url"], timeout=60) as stream:
+			xmlstr = stream.read()
 		
 		# Parse data and build result
 		root = xml.etree.ElementTree.fromstring(xmlstr)
