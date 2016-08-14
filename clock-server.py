@@ -69,7 +69,11 @@ def get_time():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	try:  # Try to get time from NTP
-		result = ["ntp", round(_get_ntp_time("ca.pool.ntp.org"))]
+		ntpserv = configuration["ntp-server"]
+		if ntpserv is not None:
+			result = ["ntp", round(_get_ntp_time(ntpserv[0], ntpserv[1]))]
+		else:
+			raise Exception()
 	except:  # Fall back to this web server's time
 		result = ["server", round(time.time() * 1000)]
 	return json.dumps(result)
