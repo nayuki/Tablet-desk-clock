@@ -31,7 +31,7 @@ def index():
 def static_file(path):
 	if path not in authorized_static_files:
 		authorized_static_files.clear()
-		scan_static_files(web_root_dir, "")
+		_scan_static_files(web_root_dir, "")
 	if path in authorized_static_files:
 		mime = "auto"
 		for ext in MIME_TYPES:
@@ -44,14 +44,14 @@ def static_file(path):
 
 MIME_TYPES = {"html":"application/xhtml+xml", "svg":"image/svg+xml", "ttf":"application/x-font-ttf"}
 
-def scan_static_files(fspath, webpath):
+def _scan_static_files(fspath, webpath):
 	if os.path.isfile(fspath):
 		authorized_static_files.add(webpath)
 	elif os.path.isdir(fspath):
 		if webpath != "":
 			webpath += "/"
 		for name in os.listdir(fspath):
-			scan_static_files(os.path.join(fspath, name), webpath + name)
+			_scan_static_files(os.path.join(fspath, name), webpath + name)
 
 
 # ---- Clock module ----
@@ -101,7 +101,7 @@ def gettime():
 def random_wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
-	candidates = get_wallpaper_candidates()
+	candidates = _get_wallpaper_candidates()
 	if len(candidates) == 0:
 		return "null"
 	else:
@@ -113,7 +113,7 @@ def random_wallpaper():
 def get_wallpaper():
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
-	candidates = set(get_wallpaper_candidates())
+	candidates = set(_get_wallpaper_candidates())
 	if len(candidates) == 0:
 		return "null"
 	
@@ -147,7 +147,7 @@ def get_wallpaper():
 		con.close()
 
 
-def get_wallpaper_candidates():
+def _get_wallpaper_candidates():
 	dir = os.path.join(web_root_dir, "wallpaper")
 	if not os.path.isdir(dir):
 		return []
