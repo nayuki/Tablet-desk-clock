@@ -222,8 +222,6 @@ a:not([href]) {  /* JavaScript buttons */
 
 #morning {
 	box-sizing: padding-box;
-	height: unset;
-	min-height: 100%;
 	padding: 1.0% 5.0% 1.5%;
 	background: #FFF4C0;
 	color: #000000;
@@ -248,12 +246,14 @@ a:not([href]) {  /* JavaScript buttons */
 }
 
 #morning ul {
-	margin-left: 1.5em;
 	flex-grow: 1;
+	overflow-y: scroll;
 }
 
 #morning li {
-	margin: 0.5em 0em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 1.5em;
 }
 
 #morning li:first-child {
