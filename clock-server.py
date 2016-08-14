@@ -20,12 +20,13 @@ import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threadin
 
 # ---- Static file serving ----
 
+# Simple redirect for the root.
 @bottle.route("/")
 def index():
 	bottle.redirect("clock.html", 301)
 
 
-web_root_dir = "web"
+web_root_dir = "web"  # Configurable path
 
 MIME_TYPES = {
 	"html": "application/xhtml+xml",
@@ -33,8 +34,9 @@ MIME_TYPES = {
 	"ttf" : "application/x-font-ttf",
 }
 
-authorized_static_files = set()
+authorized_static_files = set()  # Automatically populated with data
 
+# Serves all static files, such as HTML, CSS, JavaScript, images, fonts.
 @bottle.route("/<path:path>")
 def static_file(path):
 	if path not in authorized_static_files:
@@ -51,6 +53,7 @@ def static_file(path):
 		bottle.abort(404)
 
 
+# Recursively scans the given local file/directory, and populates the set 'authorized_static_files'.
 def _scan_static_files(fspath, webpath):
 	if os.path.isfile(fspath):
 		authorized_static_files.add(webpath)
@@ -113,7 +116,7 @@ def _get_ntp_time(host, port=123, sock=None):
 		return (servermidpoint + int(elapsedclock / 2.0 * float(2**32))) * 1000 // 2**32 - 2208988800000
 
 
-# Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png"
+# Yields {a random file name in the wallpapers directory} as a string or null if unavailable, e.g.: "sample2.png".
 @bottle.route("/random-wallpaper.json")
 def random_wallpaper():
 	bottle.response.content_type = "application/json"
@@ -125,7 +128,7 @@ def random_wallpaper():
 		return '"' + random.choice(candidates) + '"'
 
 
-# Yields a file name or null, a wallpaper that changes only once a day (history kept on the server side).
+# Yields a file name or null, which a wallpaper that changes only once a day (history kept on the server side).
 @bottle.route("/get-wallpaper.json")
 def get_wallpaper():
 	bottle.response.content_type = "application/json"
@@ -164,6 +167,7 @@ def get_wallpaper():
 		con.close()
 
 
+# Returns a list of bare file names of all known wallpaper files.
 def _get_wallpaper_candidates():
 	dir = os.path.join(web_root_dir, "wallpaper")
 	if not os.path.isdir(dir):
@@ -172,16 +176,22 @@ def _get_wallpaper_candidates():
 	return [name for name in os.listdir(dir) if cond(name)]
 
 
+# Returns an array describing the current network status, for example:
+#   [true,       // Internet is accessible
+#    "desktop",  // One desktop is on
+#    "desktop",  // Another desktop is on
+#    "laptop"]   // And a laptop is on
 @bottle.route("/network-status.json")
 def network_status():
 	result = []
 	lock = threading.Lock()
-	def append(x):
+	def append(x):  # Appends a value to the result array, in a thread-safe way
 		lock.acquire()
 		result.append(x)
 		lock.release()
 	threads = []
 	
+	# Check Internet is accessible
 	def test_internet():
 		for _ in range(3):
 			host = random.choice(configuration["internet-test-web-sites"])
@@ -198,6 +208,7 @@ def network_status():
 	threads.append(th)
 	th.start()
 	
+	# Check various hosts are accessible
 	COMPUTER_TYPES = ("desktop", "laptop", "server")
 	def test_computer(type, host, port):
 		try:
@@ -212,6 +223,7 @@ def network_status():
 			threads.append(th)
 			th.start()
 	
+	# Wait for threads to finish, then sort the array
 	for th in threads:
 		th.join()
 	def key_func(x):
@@ -223,6 +235,7 @@ def network_status():
 			raise AssertionError()
 	result.sort(key=key_func)
 	
+	# Prepare the HTTP response
 	bottle.response.content_type = "application/json"
 	bottle.response.set_header("Cache-Control", "no-cache")
 	return json.dumps(result)
@@ -299,6 +312,8 @@ morning_reminders = {}
 # ---- Server initialization ----
 
 if __name__ == "__main__":
+	# Read the configuration file into a global variable
 	with open("config.json", "r", encoding="UTF-8") as f:
-		configuration = json.load(f)  # Global variable
+		configuration = json.load(f)
+	# Launch the web server application
 	bottle.run(host="0.0.0.0", port=configuration["web-server-port"], reloader=True)
