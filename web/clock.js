@@ -100,7 +100,7 @@ var timeModule = new function() {
 					timeOffset = 0;  // Don't correct if source is local, because it's counter-productive
 			}
 		});
-		setTimeout(autoUpdateTimeOffset, 60 * 60 * 1000);
+		setTimeout(autoUpdateTimeOffset, 60 * 60 * 1000 * (0.9 + 0.2 * Math.random()));
 	}
 	
 	autoUpdateTimeOffset();
@@ -182,7 +182,7 @@ var clockModule = new function() {
 				}
 			});
 		});
-		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000);
+		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000 * (0.9 + 0.2 * Math.random()));
 	}
 	
 	// A wrapper class around a DOM text node to avoid pushing unnecessary value updates to the DOM.
