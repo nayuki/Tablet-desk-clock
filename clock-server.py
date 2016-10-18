@@ -70,14 +70,24 @@ def _scan_static_files(fspath, webpath):
 # Yields the time source and current Unix millisecond time, e.g.: ["server", 1433185355946] or ["ntp", 1470939694075].
 @bottle.route("/get-time.json")
 def get_time():
+	global clock_correction
 	try:  # Try to get time from NTP
 		ntpserv = configuration["ntp-server"]
 		if ntpserv is not None:
-			return _json_response(["ntp", round(_get_ntp_time(ntpserv[0], ntpserv[1]))])
+			temp = _get_ntp_time(ntpserv[0], ntpserv[1])
+			clock_correction = (temp - round(time.time() * 1000), time.time() + 10000)
+			return _json_response(["ntp", temp])
 		else:
 			raise Exception()
 	except:  # Fall back to this web server's time
-		return _json_response(["server", round(time.time() * 1000)])
+		if clock_correction is not None and time.time() > clock_correction[1]:
+			clock_correction = None
+		temp = round(time.time() * 1000)
+		if clock_correction is not None:
+			temp += clock_correction[0]
+		return _json_response(["server", temp])
+
+clock_correction = None  # Either None or a tuple of (int millisecond correction, float expiration time)
 
 
 # Communicates with the given Network Time Protocol server,
