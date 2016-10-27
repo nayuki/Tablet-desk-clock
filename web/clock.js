@@ -216,16 +216,16 @@ var adminModule = new function() {
 			return;
 		isAnimating = true;
 		if (adminContentElem.style.display == "none") {
-			adminContentElem.className = "showing";
+			adminContentElem.classList.add("showing");
 			adminContentElem.style.display = "block";
 			setTimeout(function() {
-				adminContentElem.className = "";
+				adminContentElem.classList.remove("showing");
 				isAnimating = false; }, 150);  // Must be a bit larger than the number declared in CSS
 		} else {
-			adminContentElem.className = "hiding";
+			adminContentElem.classList.add("hiding");
 			setTimeout(function() {
 				adminContentElem.style.display = "none";
-				adminContentElem.className = "";
+				adminContentElem.classList.remove("hiding");
 				isAnimating = false; }, 350);  // Must be a bit larger than the number declared in CSS
 		}
 	}
@@ -332,10 +332,10 @@ var morningModule = new function() {
 	}
 	
 	function hideMorning() {
-		morningElem.className = "hiding";
+		morningElem.classList.add("hiding");
 		setTimeout(function() {
 			morningElem.style.display = "none";
-			morningElem.className = "";
+			morningElem.classList.remove("hiding");
 			clearMessages(); }, 600);  // Must be a bit larger than the number declared in CSS
 	}
 	
