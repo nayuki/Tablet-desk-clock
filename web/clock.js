@@ -217,20 +217,23 @@ var adminModule = new function() {
 		isAnimating = true;
 		if (adminContentElem.style.display == "none") {
 			adminContentElem.classList.add("showing");
-			adminContentElem.style.display = "block";
-			setTimeout(function() {
-				adminContentElem.classList.remove("showing");
-				isAnimating = false; }, 150);  // Must be a bit larger than the number declared in CSS
+			adminContentElem.style.removeProperty("display");
 		} else {
 			adminContentElem.classList.add("hiding");
-			setTimeout(function() {
-				adminContentElem.style.display = "none";
-				adminContentElem.classList.remove("hiding");
-				isAnimating = false; }, 350);  // Must be a bit larger than the number declared in CSS
 		}
 	}
 	
 	document.getElementById("admin-gear").onclick = togglePane;
+	
+	adminContentElem.addEventListener("animationend", function(ev) {
+		if (ev.animationName == "fadein") {
+			if (adminContentElem.classList.contains("hiding"))
+				adminContentElem.style.display = "none";
+			adminContentElem.classList.remove("showing");
+			adminContentElem.classList.remove("hiding");
+			isAnimating = false;
+		}
+	});
 	
 	// For clicking outside the admin box
 	adminContentElem.onclick = function(e) {
@@ -333,10 +336,6 @@ var morningModule = new function() {
 	
 	function hideMorning() {
 		morningElem.classList.add("hiding");
-		setTimeout(function() {
-			morningElem.style.display = "none";
-			morningElem.classList.remove("hiding");
-			clearMessages(); }, 600);  // Must be a bit larger than the number declared in CSS
 	}
 	
 	function addMessage(text) {
@@ -386,5 +385,11 @@ var morningModule = new function() {
 	
 	// Initialization
 	morningElem.onclick = hideMorning;
+	morningElem.addEventListener("animationend", function(ev) {
+		if (ev.animationName == "fadein" && morningElem.classList.contains("hiding")) {
+			morningElem.style.display = "none";
+			morningElem.classList.remove("hiding");
+		}
+	});
 	scheduleNextMorning();
 };
