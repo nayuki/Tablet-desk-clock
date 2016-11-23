@@ -318,6 +318,8 @@ var weatherModule = new function() {
 var morningModule = new function() {
 	var morningElem = document.getElementById("morning");
 	var remindersElem = document.getElementById("morning-reminders");
+	var isAnimating = false;
+	var hideTimeout = null;
 	
 	function showMorning() {
 		var greetingSpans = document.querySelectorAll("#morning h1 span");
@@ -329,13 +331,23 @@ var morningModule = new function() {
 		addMessage("(Loading...)");
 		doMorningRequest();
 		
+		isAnimating = false;
+		if (hideTimeout != null)
+			clearTimeout(hideTimeout);
 		morningElem.style.removeProperty("display");
+		morningElem.classList.remove("hiding");
 		scheduleNextMorning();
-		setTimeout(hideMorning, 5 * 3600 * 1000);
+		hideTimeout = setTimeout(hideMorning, 5 * 3600 * 1000);
 	}
 	
 	function hideMorning() {
+		if (isAnimating)
+			return;
+		isAnimating = true;
 		morningElem.classList.add("hiding");
+		if (hideTimeout != null)
+			clearTimeout(hideTimeout);
+		hideTimeout = null;
 	}
 	
 	function addMessage(text) {
@@ -389,6 +401,7 @@ var morningModule = new function() {
 		if (ev.animationName == "fadein" && morningElem.classList.contains("hiding")) {
 			morningElem.style.display = "none";
 			morningElem.classList.remove("hiding");
+			isAnimating = false;
 		}
 	});
 	scheduleNextMorning();
