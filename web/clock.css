@@ -16,13 +16,19 @@ html, body, h1, h2, p, ul, li {
 }
 
 html {
-	background: #000000;
+	background-color: #000000;
+	background-size: cover;
+	background-position: center;
 	font-family: "Swiss 721 BT", sans-serif;
 	font-size: 4.2vw;  /* Base font size */
 	font-weight: 400;
 	line-height: 1.0;
 	color: #FFFFFF;
 	-moz-user-select: none;  /* Accidental text selection on touchscreens is annoying */
+}
+
+body {
+	background-color: rgba(0,0,0,0.65);
 }
 
 html, body {
@@ -67,8 +73,6 @@ a:not([href]) {  /* JavaScript buttons */
 /*---- Clock module ----*/
 
 #clock {
-	background-size: cover;
-	background-position: center;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;

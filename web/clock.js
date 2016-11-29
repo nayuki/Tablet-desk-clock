@@ -141,10 +141,8 @@ var clockModule = new function() {
 	// Updates the clock wallpaper once. Type is either "get" or "random".
 	var changeWallpaper = this.changeWallpaper = function(type) {
 		getAndProcessJson("/" + type + "-wallpaper.json", 3000, function(data) {
-			if (typeof data == "string") {
-				var clockElem = document.getElementById("clock");
-				clockElem.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('wallpaper/" + data + "')";
-			}
+			if (typeof data == "string")
+				document.documentElement.style.backgroundImage = "url('wallpaper/" + data + "')";
 		});
 	};
 	
