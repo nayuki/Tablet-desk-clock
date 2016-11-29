@@ -118,6 +118,7 @@ var clockModule = new function() {
 	var dateTextNode   = new MemoizingTextNode("clock-date"  );
 	var DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	var prevClockUpdate = null;  // In Unix seconds
+	var dimmingState = 0;
 	
 	// Updates the date and time texts every second.
 	function autoUpdateClockDisplay() {
@@ -183,6 +184,31 @@ var clockModule = new function() {
 		setTimeout(autoUpdateNetworkStatus, 10 * 60 * 1000 * (0.9 + 0.2 * Math.random()));
 	}
 	
+	function initDimmingHandler() {
+		var clockElem = document.getElementById("clock");
+		clockElem.onclick = function() {
+			dimmingState = (dimmingState + 1) % 3;
+			var bodyStyle = document.querySelector("body").style;
+			var clockStyle = clockElem.style;
+			switch (dimmingState) {
+				case 0:
+					bodyStyle.backgroundColor = "rgba(0,0,0,0.65)";
+					clockStyle.opacity = "1.0";
+					break;
+				case 1:
+					bodyStyle.backgroundColor = "rgba(0,0,0,0.0)";
+					clockStyle.opacity = "0.0";
+					break;
+				case 2:
+					bodyStyle.backgroundColor = "rgba(0,0,0,0.2)";
+					clockStyle.opacity = "0.7";
+					break;
+				default:
+					throw "Assertion error";
+			}
+		};
+	}
+	
 	// A wrapper class around a DOM text node to avoid pushing unnecessary value updates to the DOM.
 	function MemoizingTextNode(elemId) {
 		var textNode = getChildTextNode(elemId);
@@ -196,6 +222,7 @@ var clockModule = new function() {
 	}
 	
 	// Initialization
+	initDimmingHandler();
 	autoUpdateClockDisplay();
 	autoUpdateWallpaper();
 	setTimeout(autoUpdateNetworkStatus, 5000);
@@ -221,7 +248,10 @@ var adminModule = new function() {
 		}
 	}
 	
-	document.getElementById("admin-gear").onclick = togglePane;
+	document.getElementById("admin-gear").onclick = function(ev) {
+		togglePane();
+		ev.stopPropagation();
+	}
 	
 	adminContentElem.addEventListener("animationend", function(ev) {
 		if (ev.animationName == "fadein") {

@@ -29,6 +29,7 @@ html {
 
 body {
 	background-color: rgba(0,0,0,0.65);
+	transition: background-color 1.0s ease;
 }
 
 html, body {
@@ -73,6 +74,7 @@ a:not([href]) {  /* JavaScript buttons */
 /*---- Clock module ----*/
 
 #clock {
+	transition: opacity 1.0s ease;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
