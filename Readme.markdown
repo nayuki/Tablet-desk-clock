@@ -17,4 +17,4 @@ Note: Viewing the static HTML file on disk will show the basic clock but not sup
 ---
 
 Home page: https://www.nayuki.io/page/tablet-desk-clock  
-Copyright © 2016 Project Nayuki. All rights reserved. No warranty.
+Copyright © 2017 Project Nayuki. All rights reserved. No warranty.

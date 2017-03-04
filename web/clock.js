@@ -284,6 +284,48 @@ var adminModule = new function() {
 		clockModule.changeWallpaper("random");
 		togglePane();
 	};
+	
+	// Fullscreen API
+	(function() {
+		function prefixifyFullscreenMember(obj, name) {
+			if (name in obj)
+				return name;
+			name = name.charAt(0).toUpperCase() + name.substring(1);
+			var result = null;
+			["webkit", "moz", "ms"].forEach(function(prefix) {
+				var temp = prefix + name;
+				if (prefix == "moz")
+					temp = temp.replace(/screen/i, "Screen").replace(/exit/i, "Cancel");
+				if (temp in obj)
+					result = temp;
+			});
+			return result;
+		}
+		
+		function updateButtons() {
+			if (document[prefixifyFullscreenMember(document, "fullscreenElement")] == null) {
+				document.getElementById("admin-enter-full-screen-item").style.removeProperty("display");
+				document.getElementById("admin-exit-full-screen-item").style.display = "none";
+			} else {
+				document.getElementById("admin-enter-full-screen-item").style.display = "none";
+				document.getElementById("admin-exit-full-screen-item").style.removeProperty("display");
+			}
+		}
+		
+		document.querySelector("#admin-enter-full-screen-item a").onclick = function() {
+			document.documentElement[prefixifyFullscreenMember(document.documentElement, "requestFullscreen")]();
+		};
+		document.querySelector("#admin-exit-full-screen-item a").onclick = function() {
+			document[prefixifyFullscreenMember(document, "exitFullscreen")]();
+		};
+		["webkit", "moz", "ms"].forEach(function(prefix) {
+			document["on" + prefix + "fullscreenchange"] = function() {
+				togglePane();
+				updateButtons();
+			}
+		});
+		updateButtons();
+	})();
 };
 
 
