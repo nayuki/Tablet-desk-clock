@@ -248,7 +248,7 @@ var adminModule = new function() {
 		}
 	}
 	
-	document.getElementById("admin-gear").onclick = function(ev) {
+	document.getElementById("admin-menu").onclick = function(ev) {
 		togglePane();
 		ev.stopPropagation();
 	}
