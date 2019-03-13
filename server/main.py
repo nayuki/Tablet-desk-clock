@@ -15,7 +15,7 @@
 import sys
 if sys.version_info[ : 3] < (3, 0, 0):
 	raise RuntimeError("Requires Python 3+")
-import bottle, json, os, socketserver, threading, wsgiref.simple_server
+import bottle, json, os, socketserver, threading, urllib.error, urllib.request, wsgiref.simple_server
 
 
 
@@ -33,7 +33,7 @@ MEDIA_TYPES = {
 
 
 
-# ---- Static file serving ----
+# ---- Special routes ----
 
 # Simple redirect for the root path.
 @bottle.route("/")
@@ -47,6 +47,23 @@ def config_json():
 	bottle.response.content_type = "application/json"
 	return open(CONFIG_FILE, "rb")
 
+
+# For bypassing CORS.
+@bottle.route("/proxy/<path:path>")
+def proxy(path):
+	try:
+		with urllib.request.urlopen(path, timeout=30) as fin:
+			data = fin.read()
+			temp = [val for (key, val) in fin.getheaders() if key == "Content-Type"]
+			if len(temp) == 1:
+				bottle.response.content_type = temp[0]
+			return data
+	except urllib.error.URLError:
+		bottle.abort(500)
+
+
+
+# ---- Static files ----
 
 authorized_static_files = set()  # Automatically populated with data
 authorized_static_files_lock = threading.RLock()
