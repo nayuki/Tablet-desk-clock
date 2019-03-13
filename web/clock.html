@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<!-- 
+ - Tablet desk clock
+ - 
+ - Copyright (c) Project Nayuki
+ - All rights reserved. Contact Nayuki for licensing.
+ - https://www.nayuki.io/page/tablet-desk-clock
+ -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Desk clock</title>
+		<meta http-equiv="Content-Style-Type" content="text/css"/>
+		<meta http-equiv="Content-Script-Type" content="application/javascript"/>
+		<link rel="stylesheet" href="clock.css" type="text/css" media="screen"/>
+	</head>
+	
+	<body>
+		<article id="clock">
+			<div id="clock-datetime-box">
+				<div id="clock-time-box"><span id="clock-hour"></span><span id="clock-colon">:</span><span id="clock-minute"></span><span id="clock-second"></span></div>
+				<div id="clock-date">&#xA0;</div>
+			</div>
+			<div id="clock-utc">&#xA0;</div>
+		</article>
+		
+		<script type="application/javascript" src="clock.js"></script>
+	</body>
+</html>
