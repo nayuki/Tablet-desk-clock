@@ -131,13 +131,13 @@ namespace weather {
 		while (true) {
 			await updateWeatherOnce();
 			
-			// Schedule next update at about 5 minutes past the hour
+			// Schedule next update at 7~10 minutes past the hour
 			const now = time.correctedDate();
 			let next = new Date(now.getTime());
-			next.setMinutes(4);
+			next.setMinutes(7);
 			next.setSeconds(0);
-			next.setMilliseconds(Math.random() * 2 * 60 * 1000);  // Jitter 2 minutes
-			while (next.getTime() < now.getTime() + 5 * 60 * 1000)
+			next.setMilliseconds(Math.random() * 3 * 60 * 1000);  // Jitter 3 minutes
+			while (next.getTime() < now.getTime() + 2 * 60 * 1000)
 				next.setTime(next.getTime() + 60 * 60 * 1000);
 			await util.sleep(next.getTime() - now.getTime());
 		}
