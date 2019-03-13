@@ -21,6 +21,8 @@ import bottle, json, os, socketserver, threading, wsgiref.simple_server
 
 # ---- Constants ----
 
+CONFIG_FILE = os.path.join("config.json")
+
 WEB_ROOT_DIR = os.path.join("..", "web")
 
 MEDIA_TYPES = {
@@ -37,6 +39,13 @@ MEDIA_TYPES = {
 @bottle.route("/")
 def index():
 	bottle.redirect("clock.html", 301)
+
+
+# Special static file.
+@bottle.route("/config.json")
+def config_json():
+	bottle.response.content_type = "application/json"
+	return open(CONFIG_FILE, "rb")
 
 
 authorized_static_files = set()  # Automatically populated with data
@@ -77,7 +86,7 @@ def static_file(path):
 
 # Read config file and launch web server app
 if __name__ == "__main__":
-	with open("config.json", "rt", encoding="UTF-8") as fin:
+	with open(CONFIG_FILE, "rt", encoding="UTF-8") as fin:
 		configuration = json.load(fin)
 	class ThreadingWSGIServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
 		daemon_threads = True
