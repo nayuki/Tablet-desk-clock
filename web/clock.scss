@@ -81,6 +81,28 @@ html, body {
 		letter-spacing: 0.01em;
 		font-kerning: none;
 	}
+	
+	#clock-weather {
+		position: absolute;
+		right: 2vw;
+		bottom: 1vw;
+		display: flex;
+		flex-direction: row;
+		align-items: flex-end;
+		letter-spacing: 0.01em;
+		
+		#clock-weather-description {
+			display: block;
+			font-size: 70%;
+			font-weight: 100;
+		}
+		
+		#clock-weather-temperature {
+			display: block;
+			margin-left: 0.8em;
+			font-weight: 600;
+		}
+	}
 }
 
 
