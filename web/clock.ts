@@ -57,6 +57,38 @@ namespace clock {
 
 
 
+namespace wallpaper {
+	
+	async function initialize() {
+		while (true) {
+			try {
+				const url = (await util.doXhr("/wallpaper-daily.json", "json", 10000)).response;
+				if (typeof url != "string")
+					throw "Invalid data";
+				document.documentElement.style.backgroundImage =
+					`url('wallpaper/${encodeURIComponent(url)}')`;
+			} catch (e) {}
+			
+			// Schedule next update at 05:00 local time
+			const now = new Date();
+			let next = new Date(now.getTime());
+			next.setHours(5);
+			next.setMinutes(0);
+			next.setSeconds(0);
+			next.setMilliseconds(0);
+			while (next.getTime() <= now.getTime())
+				next.setDate(next.getDate() + 1);
+			await util.sleep(next.getTime() - now.getTime());
+		}
+	}
+	
+	
+	setTimeout(initialize, 0);
+	
+}
+
+
+
 namespace weather {
 	
 	let initialized: boolean = false;

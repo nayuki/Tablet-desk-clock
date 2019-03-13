@@ -15,7 +15,7 @@
 import sys
 if sys.version_info[ : 3] < (3, 0, 0):
 	raise RuntimeError("Requires Python 3+")
-import bottle, json, os, socketserver, threading, urllib.error, urllib.request, wsgiref.simple_server
+import bottle, json, modules, os, socketserver, threading, urllib.error, urllib.request, wsgiref.simple_server
 
 
 
@@ -96,6 +96,15 @@ def static_file(path):
 		return bottle.static_file(path, root=WEB_ROOT_DIR, mimetype=mime)
 	else:
 		bottle.abort(404)
+
+
+
+# ---- Utilities ----
+
+def json_response(data):
+	bottle.response.content_type = "application/json"
+	bottle.response.set_header("Cache-Control", "no-cache")
+	return json.dumps(data)
 
 
 

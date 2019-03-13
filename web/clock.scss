@@ -28,6 +28,12 @@ html {
 
 html {
 	background-color: #000000;
+	background-size: cover;
+	background-position: center;
+}
+
+body {
+	background-color: rgba(0,0,0,0.65);  // Dim the wallpaper
 }
 
 html, body {
