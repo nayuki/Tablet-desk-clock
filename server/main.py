@@ -38,11 +38,11 @@ MEDIA_TYPES = {
 # Simple redirect for the root path.
 @bottle.route("/")
 def index():
-	bottle.redirect("clock.html", 301)
+	bottle.redirect("/file/clock.html", 301)
 
 
 # Special static file.
-@bottle.route("/config.json")
+@bottle.route("/file/config.json")
 def config_json():
 	bottle.response.content_type = "application/json"
 	return open(CONFIG_FILE, "rb")
@@ -69,7 +69,7 @@ authorized_static_files = set()  # Automatically populated with data
 authorized_static_files_lock = threading.RLock()
 
 # Serves all static files, such as HTML, CSS, JavaScript, images, fonts.
-@bottle.route("/<path:path>")
+@bottle.route("/file/<path:path>")
 def static_file(path):
 	
 	# Recursively scans the given local file/directory, and populates the set 'authorized_static_files'.
