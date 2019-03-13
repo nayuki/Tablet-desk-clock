@@ -1,7 +1,7 @@
 # 
 # Tablet desk clock web server
 # 
-# Copyright (c) 2019 Project Nayuki
+# Copyright (c) Project Nayuki
 # All rights reserved. Contact Nayuki for licensing.
 # https://www.nayuki.io/page/tablet-desk-clock
 # 
