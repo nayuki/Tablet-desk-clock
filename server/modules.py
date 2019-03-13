@@ -16,6 +16,42 @@ if __name__ == "__main__":
 
 
 
+# ---- Time ----
+
+import contextlib, socket, struct, time
+
+@bottle.route("/time/<protocol>/<host>/<port>")
+def get_time(protocol, host, port):
+	if protocol != "ntp":
+		raise ValueError()
+	
+	with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
+		sock.bind(("0.0.0.0", 0))
+		sock.settimeout(1.0)
+		target = socket.getaddrinfo(host, port)[0][4]
+		
+		localstart = time.time()
+		sock.sendto(bytes([0x1B] + [0] * 47), target)
+		packet = sock.recv(100)
+		localend = time.time()
+		
+		fields = struct.unpack(">BBBBIIIQQQQ", packet)
+		header = fields[0]
+		leap = header >> 6
+		version = (header >> 3) & 7
+		mode = header & 7
+		if leap == 3 or version != 3 or mode != 4:
+			raise ValueError("Response contains invalid data")
+		remotereceive = fields[9]
+		remotetransmit = fields[10]
+		networkdelay = ((localend - localstart) - (remotetransmit - remotereceive)) / 2.0
+		rawresult = remotetransmit + networkdelay
+		result = rawresult * 1000 // 2**32 - 2208988800000  # Convert to Unix milliseconds
+		return main.json_response(result)
+
+
+
+
 # ---- Wallpaper ----
 
 import contextlib, datetime, os, random, sqlite3

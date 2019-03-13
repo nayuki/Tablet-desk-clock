@@ -59,8 +59,26 @@ namespace clock {
 
 namespace time {
 	
+	let timeCorrection: number = 0;  // Milliseconds late
+	
+	
 	export function correctedDate(): Date {
-		return new Date(Date.now());
+		return new Date(Date.now() + timeCorrection);
+	}
+	
+	
+	export async function initialize() {
+		while (true) {
+			try {
+				const path: string = util.configuration["time-server"].join("/");
+				const remoteTime = (await util.doXhr("/time/" + path, "json", 3000)).response;
+				if (typeof remoteTime != "number")
+					throw "Invalid data";
+				timeCorrection = remoteTime - Date.now();
+			} catch (e) {}
+			
+			await util.sleep(60 * 60 * 1000);  // Resynchronize every hour
+		}
 	}
 	
 }
@@ -215,6 +233,7 @@ namespace util {
 	async function initialize() {
 		configuration = (await doXhr("config.json", "json", 60000)).response;
 		weather.initialize();
+		time.initialize();
 	}
 	
 	
