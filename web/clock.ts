@@ -15,7 +15,7 @@ namespace clock {
 	
 	
 	function autoUpdateClockDisplay(): void {
-		const d = new Date();
+		const d = time.correctedDate();
 		const curUpdate: number = Math.floor(d.getTime() / 1000);
 		if (curUpdate != prevUpdate) {
 			prevUpdate = curUpdate;
@@ -29,7 +29,7 @@ namespace clock {
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
 		}
-		setTimeout(autoUpdateClockDisplay, 1000 - Date.now() % 1000);
+		setTimeout(autoUpdateClockDisplay, 1000 - time.correctedDate().getTime() % 1000);
 	}
 	
 	
@@ -57,6 +57,16 @@ namespace clock {
 
 
 
+namespace time {
+	
+	export function correctedDate(): Date {
+		return new Date(Date.now());
+	}
+	
+}
+
+
+
 namespace wallpaper {
 	
 	async function initialize() {
@@ -70,7 +80,7 @@ namespace wallpaper {
 			} catch (e) {}
 			
 			// Schedule next update at 05:00 local time
-			const now = new Date();
+			const now = time.correctedDate();
 			let next = new Date(now.getTime());
 			next.setHours(5);
 			next.setMinutes(0);
@@ -104,7 +114,7 @@ namespace weather {
 			await updateWeatherOnce();
 			
 			// Schedule next update at about 5 minutes past the hour
-			const now = new Date();
+			const now = time.correctedDate();
 			let next = new Date(now.getTime());
 			next.setMinutes(4);
 			next.setSeconds(0);
