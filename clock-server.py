@@ -15,7 +15,7 @@
 import sys
 if sys.version_info[ : 3] < (3, 0, 0):
 	raise RuntimeError("Requires Python 3+")
-import bottle, datetime, json, os, random, re, socket, sqlite3, struct, threading, time, urllib.request, xml.etree.ElementTree
+import bottle, datetime, json, os, random, re, socket, socketserver, sqlite3, struct, threading, time, urllib.request, xml.etree.ElementTree, wsgiref.simple_server
 
 
 # ---- Static file serving ----
@@ -319,9 +319,25 @@ def _json_response(data):
 
 # ---- Server initialization ----
 
+class ThreadingWSGIServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
+	daemon_threads = True
+
+
+class Server(object):
+	def __init__(self, wsgi_app, listen, port):
+		self.wsgi_app = wsgi_app
+		self.listen = listen
+		self.port = port
+		self.server = wsgiref.simple_server.make_server(
+			self.listen, self.port, self.wsgi_app, ThreadingWSGIServer)
+	
+	def serve_forever(self):
+		self.server.serve_forever()
+
+
 if __name__ == "__main__":
 	# Read the configuration file into a global variable
 	with open("config.json", "r", encoding="UTF-8") as f:
 		configuration = json.load(f)
 	# Launch the web server application
-	bottle.run(host="0.0.0.0", port=configuration["web-server-port"], reloader=True)
+	Server(bottle.default_app(), "0.0.0.0", configuration["web-server-port"]).serve_forever()
