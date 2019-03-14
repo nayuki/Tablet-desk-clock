@@ -106,3 +106,18 @@ def wallpaper_candidates():
 		return []
 	return [name for name in os.listdir(dir) if
 		os.path.isfile(os.path.join(dir, name)) and name.endswith((".jpg", ".png"))]
+
+
+
+# ---- Network ----
+
+import socket
+
+@bottle.route("/tcping/<host>/<port:int>")
+def tcping(host, port):
+	try:
+		sock = socket.create_connection((host, port), timeout=1.0)
+		sock.close()
+		return main.json_response(True)
+	except:
+		return main.json_response(False)

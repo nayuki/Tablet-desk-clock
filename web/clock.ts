@@ -200,6 +200,34 @@ namespace weather {
 
 
 
+namespace network {
+	
+	export async function initialize(): Promise<void> {
+		while (true) {
+			updateInternetStatus();  // Do not wait for it
+			await util.sleep(5 * 60 * 1000);
+		}
+	}
+	
+	
+	async function updateInternetStatus(): Promise<void> {
+		let statusNoInternet = util.getElem("clock-status-no-internet");
+		let hosts = util.configuration["network-http-test-hosts"];
+		for (let i = 0; i < 3; i++) {
+			let host = hosts[Math.floor(Math.random() * hosts.length)];
+			let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10000)).response;
+			if (typeof alive == "boolean" && alive) {
+				statusNoInternet.style.display = "none";
+				return;
+			}
+		}
+		statusNoInternet.style.removeProperty("display");
+	}
+	
+}
+
+
+
 namespace util {
 	
 	export let configuration: any = null;
@@ -236,6 +264,7 @@ namespace util {
 		configuration = (await doXhr("config.json", "json", 60000)).response;
 		weather.initialize();
 		time.initialize();
+		network.initialize();
 	}
 	
 	
