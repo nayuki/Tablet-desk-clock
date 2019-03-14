@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
 import contextlib, socket, struct, time
 
-@bottle.route("/time/<protocol>/<host>/<port>")
+@bottle.route("/time/<protocol>/<host>/<port:int>")
 def get_time(protocol, host, port):
 	if protocol != "ntp":
 		raise ValueError()

@@ -67,7 +67,7 @@ namespace time {
 	}
 	
 	
-	export async function initialize() {
+	export async function initialize(): Promise<void> {
 		let statusNoTimeSync = util.getElem("clock-status-no-time-sync");
 		while (true) {
 			try {
@@ -91,7 +91,7 @@ namespace time {
 
 namespace wallpaper {
 	
-	async function initialize() {
+	async function initialize(): Promise<void> {
 		while (true) {
 			try {
 				const url = (await util.doXhr("/wallpaper-daily.json", "json", 10000)).response;
@@ -171,8 +171,6 @@ namespace weather {
 	
 	
 	async function tryUpdateWeather(): Promise<void> {
-		if (util.configuration === null)
-			throw "Configuration missing";
 		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(util.configuration["weather-canada-url"]), "document", 15000);
 		if (xhr.status != 200)
 			throw "Invalid status";
@@ -234,7 +232,7 @@ namespace util {
 	}
 	
 	
-	async function initialize() {
+	async function initialize(): Promise<void> {
 		configuration = (await doXhr("config.json", "json", 60000)).response;
 		weather.initialize();
 		time.initialize();
