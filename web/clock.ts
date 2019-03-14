@@ -60,7 +60,7 @@ namespace clock {
 	let prevUpdate: number = NaN;  // In Unix seconds
 	
 	
-	function autoUpdateClockDisplay(): void {
+	function main(): void {
 		const d = time.correctedDate();
 		const curUpdate: number = Math.floor(d.getTime() / 1000);
 		if (curUpdate != prevUpdate) {
@@ -75,7 +75,7 @@ namespace clock {
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
 		}
-		setTimeout(autoUpdateClockDisplay, 1000 - time.correctedDate().getTime() % 1000);
+		setTimeout(main, 1000 - time.correctedDate().getTime() % 1000);
 	}
 	
 	
@@ -97,7 +97,7 @@ namespace clock {
 	const EN_DASH  = "\u2013";
 	
 	
-	setTimeout(autoUpdateClockDisplay, 0);
+	setTimeout(main, 0);
 	
 }
 
@@ -137,7 +137,7 @@ namespace time {
 
 namespace wallpaper {
 	
-	async function initialize(): Promise<void> {
+	async function main(): Promise<void> {
 		while (true) {
 			try {
 				const url = (await util.doXhr("/wallpaper-daily.json", "json", 10000)).response;
@@ -161,7 +161,7 @@ namespace wallpaper {
 	}
 	
 	
-	setTimeout(initialize, 0);
+	main();
 	
 }
 
