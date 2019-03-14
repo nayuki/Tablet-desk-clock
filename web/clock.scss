@@ -109,6 +109,24 @@ html, body {
 			font-weight: 600;
 		}
 	}
+	
+	#clock-status-box {
+		position: absolute;
+		left: 1vw;
+		top: 1vw;
+		display: flex;
+		flex-direction: row;
+		
+		img {
+			display: block;
+			width: 1.2em;
+			margin-right: 0.2em;
+			padding: 0.15em;
+			border-radius: 0.2em;
+			background-color: #FFFFFF;
+			opacity: 0.3;
+		}
+	}
 }
 
 

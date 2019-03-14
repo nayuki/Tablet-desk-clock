@@ -68,6 +68,7 @@ namespace time {
 	
 	
 	export async function initialize() {
+		let statusNoTimeSync = util.getElem("clock-status-no-time-sync");
 		while (true) {
 			try {
 				const path: string = util.configuration["time-server"].join("/");
@@ -75,7 +76,10 @@ namespace time {
 				if (typeof remoteTime != "number")
 					throw "Invalid data";
 				timeCorrection = remoteTime - Date.now();
-			} catch (e) {}
+				statusNoTimeSync.style.display = "none";
+			} catch (e) {
+				statusNoTimeSync.style.removeProperty("display");
+			}
 			
 			await util.sleep(60 * 60 * 1000);  // Resynchronize every hour
 		}
