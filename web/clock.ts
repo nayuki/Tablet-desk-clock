@@ -168,7 +168,7 @@ namespace weather {
 	async function main(): Promise<void> {
 		const url: string = (await util.configPromise).response["weather-canada-url"];
 		while (true) {
-			await updateWeatherOnce(url);
+			updateWeatherOnce(url);  // Do not wait for it
 			
 			// Schedule next update at 7~10 minutes past the hour
 			const now = time.correctedDate();
@@ -176,7 +176,7 @@ namespace weather {
 			next.setMinutes(7);
 			next.setSeconds(0);
 			next.setMilliseconds(Math.random() * 3 * 60 * 1000);  // Jitter 3 minutes
-			while (next.getTime() < now.getTime() + 2 * 60 * 1000)
+			while (next.getTime() < now.getTime() + 1 * 60 * 1000)
 				next.setTime(next.getTime() + 60 * 60 * 1000);
 			await util.sleep(next.getTime() - now.getTime());
 		}
