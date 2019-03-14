@@ -162,13 +162,13 @@ namespace wallpaper {
 
 namespace weather {
 	
-	let eraseWeather: number = -1;
+	let eraseWeatherTimeout: number = -1;
 	
 	
 	async function main(): Promise<void> {
 		const url: string = (await util.configPromise).response["weather-canada-url"];
 		while (true) {
-			updateWeatherOnce(url);  // Do not wait for it
+			updateWeather(url);  // Do not wait for it
 			
 			// Schedule next update at 7~10 minutes past the hour
 			const now = time.correctedDate();
@@ -183,20 +183,16 @@ namespace weather {
 	}
 	
 	
-	async function updateWeatherOnce(url: string): Promise<void> {
-		if (eraseWeather != -1)
-			clearTimeout(eraseWeather);
-		eraseWeather = setTimeout(() => {
-				util.getElem("clock-weather-description").textContent = "";
-				util.getElem("clock-weather-temperature").textContent = "";
-				eraseWeather = -1;
-			}, 30000);
+	async function updateWeather(url: string): Promise<void> {
+		if (eraseWeatherTimeout != -1)
+			clearTimeout(eraseWeatherTimeout);
+		eraseWeatherTimeout = setTimeout(eraseWeather, 30000);
 		
 		for (let i = 0; i < 5; i++) {
 			try {
 				await tryUpdateWeather(url);
-				clearTimeout(eraseWeather);
-				eraseWeather = -1;
+				clearTimeout(eraseWeatherTimeout);
+				eraseWeatherTimeout = -1;
 				break;
 			} catch (e) {
 				await util.sleep(Math.pow(4, i + 1) * 1000);
@@ -226,6 +222,13 @@ namespace weather {
 		util.getElem("clock-weather-description").textContent = getText("siteData > currentConditions > condition");
 		const temperStr = getText("siteData > currentConditions > temperature");
 		util.getElem("clock-weather-temperature").textContent = Math.round(parseFloat(temperStr)) + " " + DEGREE + "C";
+	}
+	
+	
+	function eraseWeather(): void {
+		util.getElem("clock-weather-description").textContent = "";
+		util.getElem("clock-weather-temperature").textContent = "";
+		eraseWeatherTimeout = -1;
 	}
 	
 	
