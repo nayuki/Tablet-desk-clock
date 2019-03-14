@@ -105,7 +105,7 @@ namespace time {
 	async function main(): Promise<void> {
 		while (true) {
 			updateTimeCorrection();  // Do not wait for it
-			await util.sleep(60 * 60 * 1000);  // Resynchronize every hour
+			await util.sleep((55 + 10 * Math.random()) * 60 * 1000);  // Resynchronize about every hour
 		}
 	}
 	
@@ -249,7 +249,7 @@ namespace network {
 		const hosts = (await util.configPromise).response["network-http-test-hosts"];
 		while (true) {
 			updateInternetStatus(hosts);  // Do not wait for it
-			await util.sleep(5 * 60 * 1000);
+			await util.sleep((4.5 + 1 * Math.random()) * 60 * 1000);  // Recheck about every 5 minutes
 		}
 	}
 	
