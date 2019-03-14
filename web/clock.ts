@@ -104,7 +104,7 @@ namespace time {
 	
 	async function main(): Promise<void> {
 		while (true) {
-			updateTimeCorrection();  // Do not wait for it
+			updateTimeCorrection();  // Don't wait
 			await util.sleep((55 + 10 * Math.random()) * 60 * 1000);  // Resynchronize about every hour
 		}
 	}
@@ -171,7 +171,7 @@ namespace weather {
 	async function main(): Promise<void> {
 		const url: string = (await util.configPromise).response["weather-canada-url"];
 		while (true) {
-			updateWeather(url);  // Do not wait for it
+			updateWeather(url);  // Don't wait
 			
 			// Schedule next update at 7~10 minutes past the hour
 			const now = time.correctedDate();
@@ -248,7 +248,7 @@ namespace network {
 	async function main(): Promise<void> {
 		const hosts = (await util.configPromise).response["network-http-test-hosts"];
 		while (true) {
-			updateInternetStatus(hosts);  // Do not wait for it
+			updateInternetStatus(hosts);  // Don't wait
 			await util.sleep((4.5 + 1 * Math.random()) * 60 * 1000);  // Recheck about every 5 minutes
 		}
 	}
