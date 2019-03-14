@@ -9,6 +9,52 @@
 "use strict";
 
 
+namespace util {
+	
+	export let configuration: any = null;
+	
+	
+	export function doXhr(url: string, type: XMLHttpRequestResponseType, timeout: number): Promise<XMLHttpRequest> {
+		return new Promise((resolve, reject) => {
+			let xhr = new XMLHttpRequest();
+			xhr.onload = () => resolve(xhr);
+			xhr.ontimeout = () => reject("XHR timeout");
+			xhr.onerror = () => reject("XHR error");
+			xhr.open("GET", url, true);
+			xhr.responseType = type;
+			xhr.timeout = timeout;
+			xhr.send();
+		});
+	}
+	
+	
+	export function getElem(id: string): HTMLElement {
+		const result = document.getElementById(id);
+		if (result instanceof HTMLElement)
+			return result;
+		throw "Assertion error";
+	}
+	
+	
+	export function sleep(millis: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, millis));
+	}
+	
+	
+	async function initialize(): Promise<void> {
+		configuration = (await doXhr("config.json", "json", 60000)).response;
+		weather.initialize();
+		time.initialize();
+		network.initialize();
+	}
+	
+	
+	initialize();
+	
+}
+
+
+
 namespace clock {
 	
 	let prevUpdate: number = NaN;  // In Unix seconds
@@ -223,51 +269,5 @@ namespace network {
 		}
 		statusNoInternet.style.removeProperty("display");
 	}
-	
-}
-
-
-
-namespace util {
-	
-	export let configuration: any = null;
-	
-	
-	export function doXhr(url: string, type: XMLHttpRequestResponseType, timeout: number): Promise<XMLHttpRequest> {
-		return new Promise((resolve, reject) => {
-			let xhr = new XMLHttpRequest();
-			xhr.onload = () => resolve(xhr);
-			xhr.ontimeout = () => reject("XHR timeout");
-			xhr.onerror = () => reject("XHR error");
-			xhr.open("GET", url, true);
-			xhr.responseType = type;
-			xhr.timeout = timeout;
-			xhr.send();
-		});
-	}
-	
-	
-	export function getElem(id: string): HTMLElement {
-		const result = document.getElementById(id);
-		if (result instanceof HTMLElement)
-			return result;
-		throw "Assertion error";
-	}
-	
-	
-	export function sleep(millis: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, millis));
-	}
-	
-	
-	async function initialize(): Promise<void> {
-		configuration = (await doXhr("config.json", "json", 60000)).response;
-		weather.initialize();
-		time.initialize();
-		network.initialize();
-	}
-	
-	
-	initialize();
 	
 }
