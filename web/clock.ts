@@ -11,7 +11,7 @@
 
 namespace util {
 	
-	export let configuration: any = null;
+	export let configPromise: Promise<any> = doXhr("config.json", "json", 60000);
 	
 	
 	export function doXhr(url: string, type: XMLHttpRequestResponseType, timeout: number): Promise<XMLHttpRequest> {
@@ -39,17 +39,6 @@ namespace util {
 	export function sleep(millis: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, millis));
 	}
-	
-	
-	async function initialize(): Promise<void> {
-		configuration = (await doXhr("config.json", "json", 60000)).response;
-		weather.initialize();
-		time.initialize();
-		network.initialize();
-	}
-	
-	
-	initialize();
 	
 }
 
@@ -113,11 +102,12 @@ namespace time {
 	}
 	
 	
-	export async function initialize(): Promise<void> {
+	async function main(): Promise<void> {
+		const server: Array<string> = (await util.configPromise).response["time-server"];
 		let statusNoTimeSync = util.getElem("clock-status-no-time-sync");
 		while (true) {
 			try {
-				const path: string = util.configuration["time-server"].join("/");
+				const path: string = server.join("/");
 				const remoteTime = (await util.doXhr("/time/" + path, "json", 3000)).response;
 				if (typeof remoteTime != "number")
 					throw "Invalid data";
@@ -130,6 +120,9 @@ namespace time {
 			await util.sleep(60 * 60 * 1000);  // Resynchronize every hour
 		}
 	}
+	
+	
+	main();
 	
 }
 
@@ -169,17 +162,13 @@ namespace wallpaper {
 
 namespace weather {
 	
-	let initialized: boolean = false;
 	let eraseWeather: number = -1;
 	
 	
-	export async function initialize(): Promise<void> {
-		if (initialized)
-			throw "Assertion error";
-		initialized = true;
-		
+	async function main(): Promise<void> {
+		const url: string = (await util.configPromise).response["weather-canada-url"];
 		while (true) {
-			await updateWeatherOnce();
+			await updateWeatherOnce(url);
 			
 			// Schedule next update at 7~10 minutes past the hour
 			const now = time.correctedDate();
@@ -194,7 +183,7 @@ namespace weather {
 	}
 	
 	
-	async function updateWeatherOnce(): Promise<void> {
+	async function updateWeatherOnce(url: string): Promise<void> {
 		if (eraseWeather != -1)
 			clearTimeout(eraseWeather);
 		eraseWeather = setTimeout(() => {
@@ -205,7 +194,7 @@ namespace weather {
 		
 		for (let i = 0; i < 5; i++) {
 			try {
-				await tryUpdateWeather();
+				await tryUpdateWeather(url);
 				clearTimeout(eraseWeather);
 				eraseWeather = -1;
 				break;
@@ -216,8 +205,8 @@ namespace weather {
 	}
 	
 	
-	async function tryUpdateWeather(): Promise<void> {
-		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(util.configuration["weather-canada-url"]), "document", 15000);
+	async function tryUpdateWeather(url: string): Promise<void> {
+		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(url), "document", 15000);
 		if (xhr.status != 200)
 			throw "Invalid status";
 		let data = xhr.response;
@@ -242,23 +231,25 @@ namespace weather {
 	
 	const DEGREE = "\u00B0";
 	
+	main();
+	
 }
 
 
 
 namespace network {
 	
-	export async function initialize(): Promise<void> {
+	async function main(): Promise<void> {
+		const hosts = (await util.configPromise).response["network-http-test-hosts"];
 		while (true) {
-			updateInternetStatus();  // Do not wait for it
+			updateInternetStatus(hosts);  // Do not wait for it
 			await util.sleep(5 * 60 * 1000);
 		}
 	}
 	
 	
-	async function updateInternetStatus(): Promise<void> {
+	async function updateInternetStatus(hosts: Array<string>): Promise<void> {
 		let statusNoInternet = util.getElem("clock-status-no-internet");
-		let hosts = util.configuration["network-http-test-hosts"];
 		for (let i = 0; i < 3; i++) {
 			let host = hosts[Math.floor(Math.random() * hosts.length)];
 			let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10000)).response;
@@ -269,5 +260,8 @@ namespace network {
 		}
 		statusNoInternet.style.removeProperty("display");
 	}
+	
+	
+	main();
 	
 }
