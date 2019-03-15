@@ -11,7 +11,7 @@
 
 namespace util {
 	
-	export let configPromise: Promise<any> = doXhr("config.json", "json", 60000);
+	export let configPromise: Promise<XMLHttpRequest> = doXhr("config.json", "json", 60000);
 	
 	
 	export function doXhr(url: string, type: XMLHttpRequestResponseType, timeout: number): Promise<XMLHttpRequest> {
@@ -246,9 +246,9 @@ namespace weather {
 namespace network {
 	
 	async function main(): Promise<void> {
-		const hosts = (await util.configPromise).response["network-http-test-hosts"];
+		const config = (await util.configPromise).response;
 		while (true) {
-			updateInternetStatus(hosts);  // Don't wait
+			updateInternetStatus(config["network-http-test-hosts"]);  // Don't wait
 			await util.sleep((4.5 + 1 * Math.random()) * 60 * 1000);  // Recheck about every 5 minutes
 		}
 	}
@@ -258,11 +258,13 @@ namespace network {
 		let statusNoInternet = util.getElem("clock-status-no-internet");
 		for (let i = 0; i < 3; i++) {
 			let host = hosts[Math.floor(Math.random() * hosts.length)];
-			let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10000)).response;
-			if (typeof alive == "boolean" && alive) {
-				statusNoInternet.style.display = "none";
-				return;
-			}
+			try {
+				let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10000)).response;
+				if (typeof alive == "boolean" && alive) {
+					statusNoInternet.style.display = "none";
+					return;
+				}
+			} catch (e) {}
 		}
 		statusNoInternet.style.removeProperty("display");
 	}
