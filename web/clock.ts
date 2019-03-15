@@ -249,6 +249,7 @@ namespace network {
 		const config = (await util.configPromise).response;
 		while (true) {
 			updateInternetStatus(config["network-http-test-hosts"]);  // Don't wait
+			updateComputerStatuses(config["network-computer-tests"]);
 			await util.sleep((4.5 + 1 * Math.random()) * 60 * 1000);  // Recheck about every 5 minutes
 		}
 	}
@@ -267,6 +268,34 @@ namespace network {
 			} catch (e) {}
 		}
 		statusNoInternet.style.removeProperty("display");
+	}
+	
+	
+	function updateComputerStatuses(data: {[key:string]:Array<[string,number]>}): void {
+		for (const [type, hosts] of Object.entries(data)) {
+			hosts.forEach(([host, port], index) =>
+				updateComputerStatus(type, index, host, port));  // Don't wait
+		}
+	}
+	
+	
+	async function updateComputerStatus(type: string, index: number, host: string, port: number): Promise<void> {
+		const id = `network-computer-${type}-${index}`;
+		let img = document.getElementById(id) as (HTMLImageElement|null);
+		if (img === null) {
+			let container = document.getElementById("clock-status-box");
+			if (container === null)
+				throw "Assertion error";
+			img = container.appendChild(document.createElement("img"));
+			img.src = `icon/network-computer-${type}.svg`;
+			img.id = id;
+		}
+		img.style.display = "none";
+		
+		// Ignore exceptions because the caller isn't waiting
+		let alive = (await util.doXhr(`/tcping/${host}/${port}`, "json", 10000)).response;
+		if (typeof alive == "boolean" && alive)
+			img.style.removeProperty("display");
 	}
 	
 	

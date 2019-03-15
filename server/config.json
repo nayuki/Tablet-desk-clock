@@ -104,5 +104,11 @@
 		"whatsapp.com",
 		"nytimes.com",
 		"chase.com"
-	]
+	],
+	
+	"network-computer-tests": {
+		"desktop": [],
+		"laptop": [],
+		"server": []
+	}
 }
