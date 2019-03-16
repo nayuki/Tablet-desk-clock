@@ -1,0 +1,158 @@
+/* 
+ * Tablet desk clock
+ * 
+ * Copyright (c) Project Nayuki
+ * All rights reserved. Contact Nayuki for licensing.
+ * https://www.nayuki.io/page/tablet-desk-clock
+ */
+
+
+/*---- Whole page ----*/
+
+// Reset browser defaults
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+// Set inheritable properties at root
+html {
+	font-family: "Swiss 721 BT", sans-serif;
+	font-size: 4vw;  /* Base font size */
+	font-weight: 400;
+	line-height: 1.0;
+	color: #FFFFFF;
+	user-select: none;  /* Accidental text selection on touchscreens is annoying */
+	-moz-user-select: none;
+}
+
+html {
+	background-color: #000000;
+	background-size: cover;
+	background-position: center;
+}
+
+body {
+	background-color: rgba(0,0,0,0.65);  // Dim the wallpaper
+}
+
+html, body {
+	height: 100%;
+}
+
+
+
+/*---- Module "clock" ----*/
+
+#clock {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	position: absolute;
+	
+	#clock-datetime-box {
+		text-align: center;
+		
+		#clock-time-box {
+			font-family: "Swiss 721 BT Rounded", "Swiss 721 BT", sans-serif;
+			font-weight: 800;
+			color: #A8A8A8;
+			font-size: 29vw;
+			font-kerning: none;
+			text-shadow: 0.023em 0.023em 0.023em #202020;
+			
+			#clock-colon {
+				position: relative;
+				top: -0.07em;  /* For the font Swiss 721 BT Rounded */
+			}
+			
+			#clock-second {
+				padding-left: 0.2em;
+				font-size: 57%;
+			}
+		}
+		
+		#clock-date {
+			font-size: 8.5vw;
+		}
+		
+		#clock-daylight {
+			margin-top: 0.5em;
+			.night {
+				fill: #404070;
+			}
+			.day {
+				fill: #C0B880;
+			}
+			.hour-tick {
+				fill: #FFFFFF;
+			}
+			.current-time {
+				fill: #FFFFFF;
+			}
+		}
+	}
+	
+	#clock-utc {
+		position: absolute;
+		left: 1vw;
+		bottom: 1vw;
+		font-weight: 100;
+		letter-spacing: 0.01em;
+		font-kerning: none;
+	}
+	
+	#clock-weather {
+		position: absolute;
+		right: 2vw;
+		bottom: 1vw;
+		display: flex;
+		flex-direction: row;
+		align-items: flex-end;
+		letter-spacing: 0.01em;
+		
+		#clock-weather-description {
+			display: block;
+			font-size: 70%;
+			font-weight: 100;
+			white-space: nowrap;
+		}
+		
+		#clock-weather-temperature {
+			display: block;
+			margin-left: 0.8em;
+			font-weight: 600;
+		}
+	}
+	
+	#clock-status-box {
+		position: absolute;
+		left: 1vw;
+		top: 1vw;
+		display: flex;
+		flex-direction: row;
+		
+		img {
+			display: block;
+			width: 1.2em;
+			margin-right: 0.2em;
+			padding: 0.15em;
+			border-radius: 0.2em;
+			background-color: #FFFFFF;
+			opacity: 0.3;
+		}
+	}
+}
+
+
+
+/*---- Font files ----*/
+
+@font-face { font-family: "Swiss 721 BT"; src: url("font/swiss-721-bt-thin.ttf"  ) format("truetype"); font-weight: 100; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("font/swiss-721-bt-light.ttf" ) format("truetype"); font-weight: 200; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("font/swiss-721-bt-normal.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("font/swiss-721-bt-medium.ttf") format("truetype"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT"; src: url("font/swiss-721-bt-bold.ttf"  ) format("truetype"); font-weight: 800; font-style: normal; }
+@font-face { font-family: "Swiss 721 BT Rounded"; src: url("font/swiss-721-bt-bold-round.ttf") format("truetype"); font-weight: 800; font-style: normal; }

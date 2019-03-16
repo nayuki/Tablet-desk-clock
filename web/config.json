@@ -1,16 +1,11 @@
 {
 	"web-server-port": 51367,
 	
-	"ntp-server": ["ca.pool.ntp.org", 123],
+	"weather-canada-url": "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml",
 	
-	"canada-weather-xml-url": "http://dd.weatheroffice.ec.gc.ca/citypage_weather/xml/ON/s0000458_e.xml",
+	"time-server": ["ntp", "ca.pool.ntp.org", "123"],
 	
-	"local-test-computers": {
-		"desktop": [],
-		"laptop": [],
-		"server": []
-	},
-	"internet-test-web-sites": [
+	"network-http-test-hosts": [
 		"google.com",
 		"youtube.com",
 		"facebook.com",
@@ -109,5 +104,11 @@
 		"whatsapp.com",
 		"nytimes.com",
 		"chase.com"
-	]
+	],
+	
+	"network-computer-tests": {
+		"desktop": [],
+		"laptop": [],
+		"server": []
+	}
 }
