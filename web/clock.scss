@@ -77,6 +77,22 @@ html, body {
 		#clock-date {
 			font-size: 8.5vw;
 		}
+		
+		#clock-daylight {
+			margin-top: 0.5em;
+			.night {
+				fill: #404070;
+			}
+			.day {
+				fill: #C0B880;
+			}
+			.hour-tick {
+				fill: #FFFFFF;
+			}
+			.current-time {
+				fill: #FFFFFF;
+			}
+		}
 	}
 	
 	#clock-utc {

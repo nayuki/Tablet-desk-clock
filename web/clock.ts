@@ -63,6 +63,7 @@ namespace clock {
 			setText("clock-utc",  // UTC date/time: "01-Tue 17:49 UTC"
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
+			updateDaylightTime();
 		}
 		setTimeout(main, 1000 - time.correctedDate().getTime() % 1000);
 	}
@@ -84,6 +85,99 @@ namespace clock {
 	
 	const EN_SPACE = "\u2002";
 	const EN_DASH  = "\u2013";
+	
+	
+	export function updateDaylightRiseSet(): void {
+		let svg: Element;
+		{
+			let temp = document.getElementById("clock-daylight");
+			if (temp === null)
+				throw "Assertion error";
+			svg = temp;
+		}
+		(svg as HTMLElement).style.removeProperty("display");
+		while (svg.firstChild !== null)
+			svg.removeChild(svg.firstChild);
+		
+		const imgHeight = 1.0;
+		const tickWidth = 0.08;
+		const arrowWidth = 0.3;
+		const arrowHeight = 0.4;
+		
+		setAttr(svg, "viewBox", "0 0 24 " + imgHeight);
+		let defs = addElem("defs");
+		addBar(0, weather.sunrise / 60, false, "night");
+		addBar(weather.sunrise / 60, weather.sunset / 60, false, "day");
+		addBar(weather.sunset / 60, 24, true, "night");
+		
+		for (let i = 0; i <= 24; i++) {
+			let tickHeight = i % 6 == 0 ? 0.7 : 0.3;
+			let tickType = i % 6 == 0 ? "long" : "short";
+			let path = addElem("path");
+			let pathD = `M ${i - tickWidth / 2} ${imgHeight}`;
+			pathD += ` h ${tickWidth}`;
+			pathD += ` v ${-tickHeight}`;
+			pathD += ` l ${-tickWidth / 2} ${-tickWidth}`;
+			pathD += ` l ${-tickWidth / 2} ${tickWidth}`;
+			pathD += ` z`;
+			setAttr(path, "d", pathD);
+			setAttr(path, "class", "hour-tick " + tickType);
+		}
+		
+		{
+			let path = addElem("path");
+			path.setAttribute("id", "clock-daylight-current-time");
+			let pathD = `M ${-arrowWidth / 2} 0`;
+			pathD += ` l ${arrowWidth / 2} ${arrowHeight}`;
+			pathD += ` l ${arrowWidth / 2} ${-arrowHeight}`;
+			pathD += ` z`;
+			setAttr(path, "d", pathD);
+			setAttr(path, "fill", "#FFFFFF");
+			defs.appendChild(path);
+			let use = addElem("use");
+			use.setAttribute("href", "#" + path.getAttribute("id"));
+			use.setAttribute("class", "current-time");
+		}
+		
+		updateDaylightTime();
+		
+		function setAttr(elem: Element, key: string, val: string|number) {
+			elem.setAttribute(key, val.toString());
+		}
+		
+		function addBar(start: number, end: number, final: boolean, clazz: string) {
+			let path = addElem("path");
+			let pathD = `M ${start} 0`;
+			pathD += ` H ${end}`;
+			if (final)
+				pathD += ` v ${imgHeight}`;
+			else {
+				pathD += ` l 0.1 ${imgHeight / 2}`;
+				pathD += ` l -0.1 ${imgHeight / 2}`;
+			}
+			pathD += ` H ${start}`;
+			pathD += ` z`;
+			setAttr(path, "d", pathD);
+			setAttr(path, "class", clazz);
+		}
+		
+		function addElem(tag: string) {
+			return svg.appendChild(
+				document.createElementNS(svg.namespaceURI, tag));
+		}
+	}
+	
+	
+	function updateDaylightTime(): void {
+		let svg = document.getElementById("clock-daylight");
+		if (svg === null)
+			throw "Assertion error";
+		let use = svg.querySelector(".current-time");
+		if (use === null)
+			return;
+		const d = time.correctedDate();
+		use.setAttribute("x", (d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 60 / 60).toString());
+	}
 	
 	
 	setTimeout(main, 0);
@@ -165,6 +259,8 @@ namespace wallpaper {
 
 namespace weather {
 	
+	export let sunrise: number = -1;  // In minutes, local time
+	export let sunset : number = -1;  // In minutes, local time
 	let eraseWeatherTimeout: number = -1;
 	
 	
@@ -225,6 +321,12 @@ namespace weather {
 		util.getElem("clock-weather-description").textContent = getText("siteData > currentConditions > condition");
 		const temperStr = getText("siteData > currentConditions > temperature");
 		util.getElem("clock-weather-temperature").textContent = Math.round(parseFloat(temperStr)) + " " + DEGREE + "C";
+		
+		sunrise = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > hour"), 10) * 60;
+		sunrise += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > minute"), 10);
+		sunset = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > hour"), 10) * 60;
+		sunset += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > minute"), 10);
+		clock.updateDaylightRiseSet();
 	}
 	
 	
