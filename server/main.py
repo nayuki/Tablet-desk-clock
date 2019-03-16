@@ -21,8 +21,6 @@ import bottle, json, modules, os, socketserver, threading, urllib.error, urllib.
 
 # ---- Constants ----
 
-CONFIG_FILE = os.path.join("config.json")
-
 WEB_ROOT_DIR = os.path.join("..", "web")
 
 MEDIA_TYPES = {
@@ -39,13 +37,6 @@ MEDIA_TYPES = {
 @bottle.route("/")
 def index():
 	bottle.redirect("/file/clock.html", 301)
-
-
-# Special static file.
-@bottle.route("/file/config.json")
-def config_json():
-	bottle.response.content_type = "application/json"
-	return open(CONFIG_FILE, "rb")
 
 
 # For bypassing CORS.
@@ -112,7 +103,7 @@ def json_response(data):
 
 # Read config file and launch web server app
 if __name__ == "__main__":
-	with open(CONFIG_FILE, "rt", encoding="UTF-8") as fin:
+	with open(os.path.join(WEB_ROOT_DIR, "config.json"), "rt", encoding="UTF-8") as fin:
 		configuration = json.load(fin)
 	class ThreadingWSGIServer(socketserver.ThreadingMixIn, wsgiref.simple_server.WSGIServer):
 		daemon_threads = True
