@@ -320,7 +320,7 @@ namespace weather {
 		
 		util.getElem("clock-weather-description").textContent = getText("siteData > currentConditions > condition");
 		const temperStr = getText("siteData > currentConditions > temperature");
-		util.getElem("clock-weather-temperature").textContent = Math.round(parseFloat(temperStr)) + " " + DEGREE + "C";
+		util.getElem("clock-weather-temperature").textContent = Math.round(parseFloat(temperStr)).toString().replace(/-/, MINUS) + " " + DEGREE + "C";
 		
 		sunrise = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > hour"), 10) * 60;
 		sunrise += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > minute"), 10);
@@ -338,6 +338,7 @@ namespace weather {
 	
 	
 	const DEGREE = "\u00B0";
+	const MINUS = "\u2212";
 	
 	main();
 	
