@@ -99,69 +99,70 @@ namespace clock {
 		while (svg.firstChild !== null)
 			svg.removeChild(svg.firstChild);
 		
-		const imgHeight = 1.0;
-		const tickWidth = 0.08;
-		const arrowWidth = 0.3;
-		const arrowHeight = 0.4;
-		
-		setAttr(svg, "viewBox", "0 0 24 " + imgHeight);
-		let defs = addElem("defs");
+		const imgHeight = 0.7;
+		setAttr(svg, "viewBox", `0 ${-imgHeight / 2} 24 ${imgHeight}`);
 		addBar(0, weather.sunrise / 60, false, "night");
 		addBar(weather.sunrise / 60, weather.sunset / 60, false, "day");
 		addBar(weather.sunset / 60, 24, true, "night");
 		
-		for (let i = 0; i <= 24; i++) {
-			let tickHeight = i % 6 == 0 ? 0.7 : 0.3;
-			let tickType = i % 6 == 0 ? "long" : "short";
-			let path = addElem("path");
-			let pathD = `M ${i - tickWidth / 2} ${imgHeight}`;
-			pathD += ` h ${tickWidth}`;
-			pathD += ` v ${-tickHeight}`;
-			pathD += ` l ${-tickWidth / 2} ${-tickWidth}`;
-			pathD += ` l ${-tickWidth / 2} ${tickWidth}`;
-			pathD += ` z`;
-			setAttr(path, "d", pathD);
-			setAttr(path, "class", "hour-tick " + tickType);
+		for (let i = 1; i < 24; i++) {
+			const dayNight = getDaylightClass(i * 60);
+			if (i % 6 == 0) {
+				const rectWidth = 0.08;
+				const rectHeight = 0.30;
+				let rect = addElem("rect");
+				setAttr(rect, "x", i - rectWidth / 2);
+				setAttr(rect, "y", -rectHeight / 2);
+				setAttr(rect, "width", rectWidth);
+				setAttr(rect, "height", rectHeight);
+				setAttr(rect, "class", "major-hour " + dayNight);
+			} else {
+				const circRadius = 0.07;
+				let circ = addElem("circle");
+				setAttr(circ, "cx", i);
+				setAttr(circ, "cy", 0);
+				setAttr(circ, "r", circRadius);
+				setAttr(circ, "class", "minor-hour " + dayNight);
+			}
 		}
 		
 		{
+			const arrowWidth = 0.25;
+			const arrowHeight = 0.7;
 			let path = addElem("path");
-			path.setAttribute("id", "clock-daylight-current-time");
-			let pathD = `M ${-arrowWidth / 2} 0`;
-			pathD += ` l ${arrowWidth / 2} ${arrowHeight}`;
-			pathD += ` l ${arrowWidth / 2} ${-arrowHeight}`;
+			let pathD = `M ${-arrowWidth / 2} ${-arrowHeight / 2}`;
+			pathD += ` h ${arrowWidth}`;
+			pathD += ` l ${-arrowWidth} ${arrowHeight}`;
+			pathD += ` h ${arrowWidth}`;
 			pathD += ` z`;
 			setAttr(path, "d", pathD);
-			setAttr(path, "fill", "#FFFFFF");
-			defs.appendChild(path);
-			let use = addElem("use");
-			use.setAttribute("href", "#" + path.getAttribute("id"));
-			use.setAttribute("class", "current-time");
+			setAttr(path, "class", "current-time");
 		}
 		
 		updateDaylightTime();
 		
-		function setAttr(elem: Element, key: string, val: string|number) {
+		function setAttr(elem: Element, key: string, val: string|number): void {
 			elem.setAttribute(key, val.toString());
 		}
 		
-		function addBar(start: number, end: number, final: boolean, clazz: string) {
+		function addBar(start: number, end: number, final: boolean, clazz: string): void {
+			const barHeight = 0.4;
 			let path = addElem("path");
-			let pathD = `M ${start} 0`;
+			let pathD = `M ${start} ${-barHeight / 2}`;
 			pathD += ` H ${end}`;
 			if (final)
-				pathD += ` v ${imgHeight}`;
+				pathD += ` v ${barHeight}`;
 			else {
-				pathD += ` l 0.1 ${imgHeight / 2}`;
-				pathD += ` l -0.1 ${imgHeight / 2}`;
+				pathD += ` l 0.1 ${barHeight / 2}`;
+				pathD += ` l -0.1 ${barHeight / 2}`;
 			}
 			pathD += ` H ${start}`;
 			pathD += ` z`;
 			setAttr(path, "d", pathD);
-			setAttr(path, "class", clazz);
+			setAttr(path, "class", "bar " + clazz);
 		}
 		
-		function addElem(tag: string) {
+		function addElem(tag: string): Element {
 			return svg.appendChild(
 				document.createElementNS(svg.namespaceURI, tag));
 		}
@@ -172,11 +173,18 @@ namespace clock {
 		let svg = document.getElementById("clock-daylight");
 		if (svg === null)
 			throw "Assertion error";
-		let use = svg.querySelector(".current-time");
-		if (use === null)
+		let elem = svg.querySelector(".current-time");
+		if (elem === null)
 			return;
 		const d = time.correctedDate();
-		use.setAttribute("x", (d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 60 / 60).toString());
+		const minutes = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+		elem.setAttribute("transform", `translate(${minutes / 60} 0)`);
+		elem.setAttribute("class", "current-time " + getDaylightClass(minutes));
+	}
+	
+	
+	function getDaylightClass(time: number) {  // Time is in minutes
+		return (weather.sunrise <= time && time <= weather.sunset) ? "day" : "night";
 	}
 	
 	
