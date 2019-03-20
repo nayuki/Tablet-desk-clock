@@ -392,13 +392,15 @@ namespace network {
 			img = container.appendChild(document.createElement("img"));
 			img.src = `icon/network-computer-${type}.svg`;
 			img.id = id;
+			img.style.display = "none";
 		}
-		img.style.display = "none";
 		
 		// Ignore exceptions because the caller isn't waiting
 		let alive = (await util.doXhr(`/tcping/${host}/${port}`, "json", 10000)).response;
 		if (typeof alive == "boolean" && alive)
 			img.style.removeProperty("display");
+		else
+			img.style.display = "none";
 	}
 	
 	
