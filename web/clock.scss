@@ -33,7 +33,7 @@ html {
 }
 
 body {
-	background-color: rgba(0,0,0,0.65);  // Dim the wallpaper
+	background-color: rgba(0,0,0,0.50);  // Dim the wallpaper
 }
 
 html, body {
@@ -80,7 +80,7 @@ html, body {
 		
 		#clock-daylight {
 			margin-top: 0.5em;
-			opacity: 0.5;
+			opacity: 0.65;
 			.bar {
 				&.night {
 					fill: #303050;
@@ -144,12 +144,12 @@ html, body {
 		
 		img {
 			display: block;
-			width: 1.2em;
+			width: 1.0em;
 			margin-right: 0.2em;
 			padding: 0.15em;
 			border-radius: 0.2em;
 			background-color: #FFFFFF;
-			opacity: 0.3;
+			opacity: 0.40;
 		}
 	}
 }
