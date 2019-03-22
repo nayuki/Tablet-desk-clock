@@ -63,7 +63,6 @@ namespace clock {
 			setText("clock-utc",  // UTC date/time: "01-Tue 17:49 UTC"
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
-			daylight.updateDaylightTime();
 		}
 		setTimeout(main, 1000 - time.correctedDate().getTime() % 1000);
 	}
@@ -166,8 +165,7 @@ namespace wallpaper {
 
 namespace weather {
 	
-	export let sunrise: number = -1;  // In minutes, local time
-	export let sunset : number = -1;  // In minutes, local time
+	export let sunRiseSet: Array<number>|null = null;  // 4-tuple in UTC
 	let eraseWeatherTimeout: number = -1;
 	
 	
@@ -229,11 +227,13 @@ namespace weather {
 		const temperStr = getText("siteData > currentConditions > temperature");
 		util.getElem("clock-weather-temperature").textContent = Math.round(parseFloat(temperStr)).toString().replace(/-/, MINUS) + " " + DEGREE + "C";
 		
-		sunrise = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > hour"), 10) * 60;
-		sunrise += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > minute"), 10);
-		sunset = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > hour"), 10) * 60;
-		sunset += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > minute"), 10);
-		daylight.updateDaylightRiseSet();
+		sunRiseSet = [
+			"siteData > riseSet > dateTime[zone=UTC][name=sunrise] > hour"  ,
+			"siteData > riseSet > dateTime[zone=UTC][name=sunrise] > minute",
+			"siteData > riseSet > dateTime[zone=UTC][name=sunset ] > hour"  ,
+			"siteData > riseSet > dateTime[zone=UTC][name=sunset ] > minute",
+		].map(q => parseInt(getText(q), 10));
+		daylight.update();
 	}
 	
 	
@@ -255,105 +255,126 @@ namespace weather {
 
 namespace daylight {
 	
-	export function updateDaylightRiseSet(): void {
-		let svg: Element;
-		{
-			let temp = document.getElementById("clock-daylight");
-			if (temp === null)
-				throw "Assertion error";
-			svg = temp;
+	let svg = document.getElementById("clock-daylight") as Element;
+	
+	
+	async function main(): Promise<void> {
+		while (true) {
+			update();
+			await util.sleep(60000);
 		}
-		(svg as HTMLElement).style.removeProperty("display");
+	}
+	
+	
+	export function update(): void {
+		if (weather.sunRiseSet === null)
+			return;
 		while (svg.firstChild !== null)
 			svg.removeChild(svg.firstChild);
+		(svg as HTMLElement).style.removeProperty("display");
 		
+		// For the current whole day in the local time zone, calculate the key moments as linear UTC timestamps
+		const now = time.correctedDate();
+		const dayStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 0).getTime();
+		const dayEndTime   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+		let sunriseTime = Math.floor(dayStartTime / MILLIS_PER_DAY) * MILLIS_PER_DAY +
+			weather.sunRiseSet[0] * MILLIS_PER_HOUR + weather.sunRiseSet[1] * MILLIS_PER_MINUTE;
+		if (sunriseTime < dayStartTime)
+			sunriseTime += MILLIS_PER_DAY;
+		let sunsetTime = Math.floor(sunriseTime / MILLIS_PER_DAY) * MILLIS_PER_DAY +
+			weather.sunRiseSet[2] * MILLIS_PER_HOUR + weather.sunRiseSet[3] * MILLIS_PER_MINUTE;
+		if (sunsetTime < sunriseTime)
+			sunsetTime += MILLIS_PER_DAY;
+		
+		// Draw day and night bars
 		const imgHeight = 0.7;
-		setAttr(svg, "viewBox", `0 ${-imgHeight / 2} 24 ${imgHeight}`);
-		addBar(0, weather.sunrise / 60, false, "night");
-		addBar(weather.sunrise / 60, weather.sunset / 60, false, "day");
-		addBar(weather.sunset / 60, 24, true, "night");
+		{
+			function addBar(start: number, end: number, final: boolean, clazz: string): void {
+				const barHeight = 0.4;
+				let path = addElem("path");
+				let pathD = `M ${start} ${-barHeight / 2}`;
+				pathD += ` H ${end}`;
+				if (final)
+					pathD += ` v ${barHeight}`;
+				else {
+					pathD += ` l 0.1 ${barHeight / 2}`;
+					pathD += ` l -0.1 ${barHeight / 2}`;
+				}
+				pathD += ` H ${start}`;
+				pathD += ` z`;
+				setAttr(path, "d", pathD);
+				setAttr(path, "class", "bar " + clazz);
+			}
+			
+			const sunrise = (sunriseTime - dayStartTime) / MILLIS_PER_HOUR;
+			const sunset  = (sunsetTime  - dayStartTime) / MILLIS_PER_HOUR;
+			const dayEnd  = (dayEndTime  - dayStartTime) / MILLIS_PER_HOUR;  // Usually 24, except for daylight saving time
+			setAttr(svg, "viewBox", `0 ${-imgHeight / 2} ${dayEnd} ${imgHeight}`);
+			addBar(0, sunrise, false, "night");
+			addBar(sunrise, sunset, false, "day");
+			addBar(sunset, dayEnd, true, "night");
+		}
 		
-		for (let i = 1; i < 24; i++) {
-			const dayNight = getDaylightClass(i * 60);
-			if (i % 6 == 0) {
+		function getDaylightClass(time: number): string {
+			return (sunriseTime <= time && time <= sunsetTime) ? "day" : "night";
+		}
+		
+		// Draw hour tick marks
+		for (let t = dayStartTime + MILLIS_PER_HOUR; t < dayEndTime; t += MILLIS_PER_HOUR) {
+			const x = (t - dayStartTime) / MILLIS_PER_HOUR;
+			if (new Date(t).getHours() % 6 == 0) {
 				const rectWidth = 0.08;
 				const rectHeight = 0.30;
 				let rect = addElem("rect");
-				setAttr(rect, "x", i - rectWidth / 2);
+				setAttr(rect, "x", x - rectWidth / 2);
 				setAttr(rect, "y", -rectHeight / 2);
 				setAttr(rect, "width", rectWidth);
 				setAttr(rect, "height", rectHeight);
-				setAttr(rect, "class", "major-hour " + dayNight);
+				setAttr(rect, "class", "major-hour " + getDaylightClass(t));
 			} else {
 				const circRadius = 0.07;
 				let circ = addElem("circle");
-				setAttr(circ, "cx", i);
+				setAttr(circ, "cx", x);
 				setAttr(circ, "cy", 0);
 				setAttr(circ, "r", circRadius);
-				setAttr(circ, "class", "minor-hour " + dayNight);
+				setAttr(circ, "class", "minor-hour " + getDaylightClass(t));
 			}
 		}
 		
+		// Draw current time arrow
 		{
 			const arrowWidth = 0.25;
 			const arrowHeight = 0.7;
 			let path = addElem("path");
-			let pathD = `M ${-arrowWidth / 2} ${-arrowHeight / 2}`;
+			let pathD = `M ${(now.getTime() - dayStartTime) / MILLIS_PER_HOUR} 0`;
+			pathD += ` m ${-arrowWidth / 2} ${-arrowHeight / 2}`;
 			pathD += ` h ${arrowWidth}`;
 			pathD += ` l ${-arrowWidth} ${arrowHeight}`;
 			pathD += ` h ${arrowWidth}`;
 			pathD += ` z`;
 			setAttr(path, "d", pathD);
-			setAttr(path, "class", "current-time");
-		}
-		
-		updateDaylightTime();
-		
-		function setAttr(elem: Element, key: string, val: string|number): void {
-			elem.setAttribute(key, val.toString());
-		}
-		
-		function addBar(start: number, end: number, final: boolean, clazz: string): void {
-			const barHeight = 0.4;
-			let path = addElem("path");
-			let pathD = `M ${start} ${-barHeight / 2}`;
-			pathD += ` H ${end}`;
-			if (final)
-				pathD += ` v ${barHeight}`;
-			else {
-				pathD += ` l 0.1 ${barHeight / 2}`;
-				pathD += ` l -0.1 ${barHeight / 2}`;
-			}
-			pathD += ` H ${start}`;
-			pathD += ` z`;
-			setAttr(path, "d", pathD);
-			setAttr(path, "class", "bar " + clazz);
-		}
-		
-		function addElem(tag: string): Element {
-			return svg.appendChild(
-				document.createElementNS(svg.namespaceURI, tag));
+			setAttr(path, "class", "current-time " + getDaylightClass(now.getTime()));
 		}
 	}
 	
 	
-	export function updateDaylightTime(): void {
-		let svg = document.getElementById("clock-daylight");
-		if (svg === null)
-			throw "Assertion error";
-		let elem = svg.querySelector(".current-time");
-		if (elem === null)
-			return;
-		const d = time.correctedDate();
-		const minutes = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
-		elem.setAttribute("transform", `translate(${minutes / 60} 0)`);
-		elem.setAttribute("class", "current-time " + getDaylightClass(minutes));
+	function addElem(tag: string): Element {
+		return svg.appendChild(
+			document.createElementNS(svg.namespaceURI, tag));
 	}
 	
 	
-	function getDaylightClass(time: number) {  // Time is in minutes
-		return (weather.sunrise <= time && time <= weather.sunset) ? "day" : "night";
+	function setAttr(elem: Element, key: string, val: string|number): void {
+		elem.setAttribute(key, val.toString());
 	}
+	
+	
+	const MILLIS_PER_MINUTE = 60 * 1000;
+	const MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
+	const MILLIS_PER_DAY = 24 * MILLIS_PER_HOUR;
+	
+	
+	main();
 	
 }
 
