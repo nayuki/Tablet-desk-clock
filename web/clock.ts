@@ -63,7 +63,7 @@ namespace clock {
 			setText("clock-utc",  // UTC date/time: "01-Tue 17:49 UTC"
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
-			updateDaylightTime();
+			daylight.updateDaylightTime();
 		}
 		setTimeout(main, 1000 - time.correctedDate().getTime() % 1000);
 	}
@@ -85,107 +85,6 @@ namespace clock {
 	
 	const EN_SPACE = "\u2002";
 	const EN_DASH  = "\u2013";
-	
-	
-	export function updateDaylightRiseSet(): void {
-		let svg: Element;
-		{
-			let temp = document.getElementById("clock-daylight");
-			if (temp === null)
-				throw "Assertion error";
-			svg = temp;
-		}
-		(svg as HTMLElement).style.removeProperty("display");
-		while (svg.firstChild !== null)
-			svg.removeChild(svg.firstChild);
-		
-		const imgHeight = 0.7;
-		setAttr(svg, "viewBox", `0 ${-imgHeight / 2} 24 ${imgHeight}`);
-		addBar(0, weather.sunrise / 60, false, "night");
-		addBar(weather.sunrise / 60, weather.sunset / 60, false, "day");
-		addBar(weather.sunset / 60, 24, true, "night");
-		
-		for (let i = 1; i < 24; i++) {
-			const dayNight = getDaylightClass(i * 60);
-			if (i % 6 == 0) {
-				const rectWidth = 0.08;
-				const rectHeight = 0.30;
-				let rect = addElem("rect");
-				setAttr(rect, "x", i - rectWidth / 2);
-				setAttr(rect, "y", -rectHeight / 2);
-				setAttr(rect, "width", rectWidth);
-				setAttr(rect, "height", rectHeight);
-				setAttr(rect, "class", "major-hour " + dayNight);
-			} else {
-				const circRadius = 0.07;
-				let circ = addElem("circle");
-				setAttr(circ, "cx", i);
-				setAttr(circ, "cy", 0);
-				setAttr(circ, "r", circRadius);
-				setAttr(circ, "class", "minor-hour " + dayNight);
-			}
-		}
-		
-		{
-			const arrowWidth = 0.25;
-			const arrowHeight = 0.7;
-			let path = addElem("path");
-			let pathD = `M ${-arrowWidth / 2} ${-arrowHeight / 2}`;
-			pathD += ` h ${arrowWidth}`;
-			pathD += ` l ${-arrowWidth} ${arrowHeight}`;
-			pathD += ` h ${arrowWidth}`;
-			pathD += ` z`;
-			setAttr(path, "d", pathD);
-			setAttr(path, "class", "current-time");
-		}
-		
-		updateDaylightTime();
-		
-		function setAttr(elem: Element, key: string, val: string|number): void {
-			elem.setAttribute(key, val.toString());
-		}
-		
-		function addBar(start: number, end: number, final: boolean, clazz: string): void {
-			const barHeight = 0.4;
-			let path = addElem("path");
-			let pathD = `M ${start} ${-barHeight / 2}`;
-			pathD += ` H ${end}`;
-			if (final)
-				pathD += ` v ${barHeight}`;
-			else {
-				pathD += ` l 0.1 ${barHeight / 2}`;
-				pathD += ` l -0.1 ${barHeight / 2}`;
-			}
-			pathD += ` H ${start}`;
-			pathD += ` z`;
-			setAttr(path, "d", pathD);
-			setAttr(path, "class", "bar " + clazz);
-		}
-		
-		function addElem(tag: string): Element {
-			return svg.appendChild(
-				document.createElementNS(svg.namespaceURI, tag));
-		}
-	}
-	
-	
-	function updateDaylightTime(): void {
-		let svg = document.getElementById("clock-daylight");
-		if (svg === null)
-			throw "Assertion error";
-		let elem = svg.querySelector(".current-time");
-		if (elem === null)
-			return;
-		const d = time.correctedDate();
-		const minutes = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
-		elem.setAttribute("transform", `translate(${minutes / 60} 0)`);
-		elem.setAttribute("class", "current-time " + getDaylightClass(minutes));
-	}
-	
-	
-	function getDaylightClass(time: number) {  // Time is in minutes
-		return (weather.sunrise <= time && time <= weather.sunset) ? "day" : "night";
-	}
 	
 	
 	setTimeout(main, 0);
@@ -334,7 +233,7 @@ namespace weather {
 		sunrise += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunrise] > minute"), 10);
 		sunset = parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > hour"), 10) * 60;
 		sunset += parseInt(getText("siteData > riseSet > dateTime:not([zone=UTC])[name=sunset] > minute"), 10);
-		clock.updateDaylightRiseSet();
+		daylight.updateDaylightRiseSet();
 	}
 	
 	
@@ -349,6 +248,112 @@ namespace weather {
 	const MINUS = "\u2212";
 	
 	main();
+	
+}
+
+
+
+namespace daylight {
+	
+	export function updateDaylightRiseSet(): void {
+		let svg: Element;
+		{
+			let temp = document.getElementById("clock-daylight");
+			if (temp === null)
+				throw "Assertion error";
+			svg = temp;
+		}
+		(svg as HTMLElement).style.removeProperty("display");
+		while (svg.firstChild !== null)
+			svg.removeChild(svg.firstChild);
+		
+		const imgHeight = 0.7;
+		setAttr(svg, "viewBox", `0 ${-imgHeight / 2} 24 ${imgHeight}`);
+		addBar(0, weather.sunrise / 60, false, "night");
+		addBar(weather.sunrise / 60, weather.sunset / 60, false, "day");
+		addBar(weather.sunset / 60, 24, true, "night");
+		
+		for (let i = 1; i < 24; i++) {
+			const dayNight = getDaylightClass(i * 60);
+			if (i % 6 == 0) {
+				const rectWidth = 0.08;
+				const rectHeight = 0.30;
+				let rect = addElem("rect");
+				setAttr(rect, "x", i - rectWidth / 2);
+				setAttr(rect, "y", -rectHeight / 2);
+				setAttr(rect, "width", rectWidth);
+				setAttr(rect, "height", rectHeight);
+				setAttr(rect, "class", "major-hour " + dayNight);
+			} else {
+				const circRadius = 0.07;
+				let circ = addElem("circle");
+				setAttr(circ, "cx", i);
+				setAttr(circ, "cy", 0);
+				setAttr(circ, "r", circRadius);
+				setAttr(circ, "class", "minor-hour " + dayNight);
+			}
+		}
+		
+		{
+			const arrowWidth = 0.25;
+			const arrowHeight = 0.7;
+			let path = addElem("path");
+			let pathD = `M ${-arrowWidth / 2} ${-arrowHeight / 2}`;
+			pathD += ` h ${arrowWidth}`;
+			pathD += ` l ${-arrowWidth} ${arrowHeight}`;
+			pathD += ` h ${arrowWidth}`;
+			pathD += ` z`;
+			setAttr(path, "d", pathD);
+			setAttr(path, "class", "current-time");
+		}
+		
+		updateDaylightTime();
+		
+		function setAttr(elem: Element, key: string, val: string|number): void {
+			elem.setAttribute(key, val.toString());
+		}
+		
+		function addBar(start: number, end: number, final: boolean, clazz: string): void {
+			const barHeight = 0.4;
+			let path = addElem("path");
+			let pathD = `M ${start} ${-barHeight / 2}`;
+			pathD += ` H ${end}`;
+			if (final)
+				pathD += ` v ${barHeight}`;
+			else {
+				pathD += ` l 0.1 ${barHeight / 2}`;
+				pathD += ` l -0.1 ${barHeight / 2}`;
+			}
+			pathD += ` H ${start}`;
+			pathD += ` z`;
+			setAttr(path, "d", pathD);
+			setAttr(path, "class", "bar " + clazz);
+		}
+		
+		function addElem(tag: string): Element {
+			return svg.appendChild(
+				document.createElementNS(svg.namespaceURI, tag));
+		}
+	}
+	
+	
+	export function updateDaylightTime(): void {
+		let svg = document.getElementById("clock-daylight");
+		if (svg === null)
+			throw "Assertion error";
+		let elem = svg.querySelector(".current-time");
+		if (elem === null)
+			return;
+		const d = time.correctedDate();
+		const minutes = d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+		elem.setAttribute("transform", `translate(${minutes / 60} 0)`);
+		elem.setAttribute("class", "current-time " + getDaylightClass(minutes));
+	}
+	
+	
+	function getDaylightClass(time: number) {  // Time is in minutes
+		return (weather.sunrise <= time && time <= weather.sunset) ? "day" : "night";
+	}
 	
 }
 
