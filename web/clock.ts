@@ -323,14 +323,18 @@ namespace daylight {
 		for (let t = dayStartTime + MILLIS_PER_HOUR; t < dayEndTime; t += MILLIS_PER_HOUR) {
 			const x = (t - dayStartTime) / MILLIS_PER_HOUR;
 			if (new Date(t).getHours() % 6 == 0) {
-				const rectWidth = 0.08;
+				const rectWidth = 0.11;
 				const rectHeight = 0.30;
-				let rect = addElem("rect");
-				setAttr(rect, "x", x - rectWidth / 2);
-				setAttr(rect, "y", -rectHeight / 2);
-				setAttr(rect, "width", rectWidth);
-				setAttr(rect, "height", rectHeight);
-				setAttr(rect, "class", "major-hour " + getDaylightClass(t));
+				const concavity = 0.05;
+				let path = addElem("path");
+				let pathD = `M ${x} 0`;
+				pathD += ` m ${-rectWidth / 2} ${-rectHeight / 2}`;
+				pathD += ` q ${concavity} ${rectHeight / 2} 0 ${rectHeight}`;
+				pathD += ` h ${rectWidth}`;
+				pathD += ` q ${-concavity} ${-rectHeight / 2} 0 ${-rectHeight}`;
+				pathD += ` z`;
+				setAttr(path, "d", pathD);
+				setAttr(path, "class", "major-hour " + getDaylightClass(t));
 			} else {
 				const circRadius = 0.07;
 				let circ = addElem("circle");
