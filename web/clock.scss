@@ -61,7 +61,7 @@ html, body {
 			color: #A8A8A8;
 			font-size: 29vw;
 			font-kerning: none;
-			text-shadow: 0.023em 0.023em 0.023em #202020;
+			text-shadow: 0.03em 0.03em 0.02em rgba(0,0,0,0.6);
 			
 			#clock-colon {
 				position: relative;
@@ -76,6 +76,7 @@ html, body {
 		
 		#clock-date {
 			font-size: 8.5vw;
+			text-shadow: 0 0 1vw rgba(0,0,0,0.3);
 		}
 		
 		#clock-daylight {
@@ -110,6 +111,7 @@ html, body {
 		font-weight: 100;
 		letter-spacing: 0.01em;
 		font-kerning: none;
+		text-shadow: 0 0 1vw rgba(0,0,0,0.3);
 	}
 	
 	#clock-weather {
@@ -120,6 +122,7 @@ html, body {
 		flex-direction: row;
 		align-items: flex-end;
 		letter-spacing: 0.01em;
+		text-shadow: 0 0 1vw rgba(0,0,0,0.3);
 		
 		#clock-weather-description {
 			display: block;
