@@ -283,7 +283,7 @@ namespace daylight {
 			sunsetTime += MILLIS_PER_DAY;
 		
 		const imgWidth = 10000;
-		const imgHeight = 290;
+		const imgHeight = 300;
 		while (svg.firstChild !== null)
 			svg.removeChild(svg.firstChild);
 		(svg as HTMLElement).style.removeProperty("display");
@@ -324,9 +324,9 @@ namespace daylight {
 		for (let t = dayStartTime + MILLIS_PER_HOUR; t < dayEndTime; t += MILLIS_PER_HOUR) {
 			const x = (t - dayStartTime) * scale;
 			if (new Date(t).getHours() % 6 == 0) {
-				const rectWidth = 46;
-				const rectHeight = 125;
-				const concavity = 21;
+				const rectWidth = 70;
+				const rectHeight = 135;
+				const concavity = 40;
 				let path = addElem("path");
 				let pathD = `M ${x} 0`;
 				pathD += ` m ${-rectWidth / 2} ${-rectHeight / 2}`;
@@ -337,7 +337,7 @@ namespace daylight {
 				setAttr(path, "d", pathD);
 				setAttr(path, "class", "major-hour " + getDaylightClass(t));
 			} else {
-				const circRadius = 29;
+				const circRadius = 30;
 				let circ = addElem("circle");
 				setAttr(circ, "cx", x);
 				setAttr(circ, "cy", 0);
@@ -348,7 +348,7 @@ namespace daylight {
 		
 		// Draw current time arrow
 		{
-			const arrowWidth = 105;
+			const arrowWidth = 100;
 			const arrowHeight = imgHeight;
 			let path = addElem("path");
 			let pathD = `M ${(now.getTime() - dayStartTime) * scale} 0`;
