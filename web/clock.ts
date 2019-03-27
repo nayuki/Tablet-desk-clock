@@ -267,13 +267,9 @@ namespace daylight {
 	
 	
 	export function update(): void {
+		// For the current whole day in the local time zone, calculate the key moments as linear UTC timestamps
 		if (weather.sunRiseSet === null)
 			return;
-		while (svg.firstChild !== null)
-			svg.removeChild(svg.firstChild);
-		(svg as HTMLElement).style.removeProperty("display");
-		
-		// For the current whole day in the local time zone, calculate the key moments as linear UTC timestamps
 		const now = time.correctedDate();
 		const dayStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 0).getTime();
 		const dayEndTime   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
@@ -286,19 +282,26 @@ namespace daylight {
 		if (sunsetTime < sunriseTime)
 			sunsetTime += MILLIS_PER_DAY;
 		
+		const imgWidth = 10000;
+		const imgHeight = 290;
+		while (svg.firstChild !== null)
+			svg.removeChild(svg.firstChild);
+		(svg as HTMLElement).style.removeProperty("display");
+		setAttr(svg, "viewBox", `0 ${-imgHeight / 2} ${imgWidth} ${imgHeight}`);
+		
 		// Draw day and night bars
-		const imgHeight = 0.7;
+		const scale = imgWidth / (dayEndTime - dayStartTime);  // Image units per millisecond
 		{
 			function addBar(start: number, end: number, final: boolean, clazz: string): void {
-				const barHeight = 0.4;
+				const barHeight = 170;
 				let path = addElem("path");
 				let pathD = `M ${start} ${-barHeight / 2}`;
 				pathD += ` H ${end}`;
 				if (final)
 					pathD += ` v ${barHeight}`;
 				else {
-					pathD += ` l 0.1 ${barHeight / 2}`;
-					pathD += ` l -0.1 ${barHeight / 2}`;
+					pathD += ` l 50 ${barHeight / 2}`;
+					pathD += ` l -50 ${barHeight / 2}`;
 				}
 				pathD += ` H ${start}`;
 				pathD += ` z`;
@@ -306,13 +309,11 @@ namespace daylight {
 				setAttr(path, "class", "bar " + clazz);
 			}
 			
-			const sunrise = (sunriseTime - dayStartTime) / MILLIS_PER_HOUR;
-			const sunset  = (sunsetTime  - dayStartTime) / MILLIS_PER_HOUR;
-			const dayEnd  = (dayEndTime  - dayStartTime) / MILLIS_PER_HOUR;  // Usually 24, except for daylight saving time
-			setAttr(svg, "viewBox", `0 ${-imgHeight / 2} ${dayEnd} ${imgHeight}`);
+			const sunrise = (sunriseTime - dayStartTime) * scale;
+			const sunset  = (sunsetTime  - dayStartTime) * scale;
 			addBar(0, sunrise, false, "night");
 			addBar(sunrise, sunset, false, "day");
-			addBar(sunset, dayEnd, true, "night");
+			addBar(sunset, imgWidth, true, "night");
 		}
 		
 		function getDaylightClass(time: number): string {
@@ -321,11 +322,11 @@ namespace daylight {
 		
 		// Draw hour tick marks
 		for (let t = dayStartTime + MILLIS_PER_HOUR; t < dayEndTime; t += MILLIS_PER_HOUR) {
-			const x = (t - dayStartTime) / MILLIS_PER_HOUR;
+			const x = (t - dayStartTime) * scale;
 			if (new Date(t).getHours() % 6 == 0) {
-				const rectWidth = 0.11;
-				const rectHeight = 0.30;
-				const concavity = 0.05;
+				const rectWidth = 46;
+				const rectHeight = 125;
+				const concavity = 21;
 				let path = addElem("path");
 				let pathD = `M ${x} 0`;
 				pathD += ` m ${-rectWidth / 2} ${-rectHeight / 2}`;
@@ -336,7 +337,7 @@ namespace daylight {
 				setAttr(path, "d", pathD);
 				setAttr(path, "class", "major-hour " + getDaylightClass(t));
 			} else {
-				const circRadius = 0.07;
+				const circRadius = 29;
 				let circ = addElem("circle");
 				setAttr(circ, "cx", x);
 				setAttr(circ, "cy", 0);
@@ -347,10 +348,10 @@ namespace daylight {
 		
 		// Draw current time arrow
 		{
-			const arrowWidth = 0.25;
-			const arrowHeight = 0.7;
+			const arrowWidth = 105;
+			const arrowHeight = imgHeight;
 			let path = addElem("path");
-			let pathD = `M ${(now.getTime() - dayStartTime) / MILLIS_PER_HOUR} 0`;
+			let pathD = `M ${(now.getTime() - dayStartTime) * scale} 0`;
 			pathD += ` m ${-arrowWidth / 2} ${-arrowHeight / 2}`;
 			pathD += ` h ${arrowWidth}`;
 			pathD += ` l ${-arrowWidth} ${arrowHeight}`;
