@@ -113,14 +113,18 @@ namespace time {
 	async function updateTimeCorrection(): Promise<void> {
 		const server: Array<string> = (await util.configPromise).response["time-server"];
 		let imgElem = util.getElem("clock-status-no-time-sync");
-		try {
-			const remoteTime = (await util.doXhr("/time/" + server.join("/"), "json", 3000)).response;
-			if (typeof remoteTime != "number")
-				throw "Invalid data";
-			timeCorrection = remoteTime - Date.now();
-			imgElem.style.display = "none";
-		} catch (e) {
-			imgElem.style.removeProperty("display");
+		for (let i = 8; i <= 13; i++) {
+			try {
+				const remoteTime = (await util.doXhr("/time/" + server.join("/"), "json", 3000)).response;
+				if (typeof remoteTime != "number")
+					throw "Invalid data";
+				timeCorrection = remoteTime - Date.now();
+				imgElem.style.display = "none";
+				break;
+			} catch (e) {
+				imgElem.style.removeProperty("display");
+				await util.sleep(Math.pow(10, i / 2));  // 10, 30, 100, 300, 1000 seconds
+			}
 		}
 	}
 	
