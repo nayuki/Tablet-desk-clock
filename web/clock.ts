@@ -51,6 +51,11 @@ namespace util {
 		return new Promise(resolve => setTimeout(resolve, millis));
 	}
 	
+	
+	export async function sleepWithJitter(midpointMillis: number): Promise<void> {
+		await sleep((0.9 + Math.random() * 0.2) * midpointMillis);
+	}
+	
 }
 
 
@@ -133,7 +138,7 @@ namespace time {
 				sleepTime = Math.pow(10, (Math.min(consecutiveFailures, 5) + 8) / 2);
 				consecutiveFailures++;
 			}
-			await util.sleep((0.9 + Math.random() * 0.2) * sleepTime);
+			await util.sleepWithJitter(sleepTime);
 		}
 	}
 	
@@ -212,7 +217,7 @@ namespace weather {
 				eraseWeatherTimeout = -1;
 				break;
 			} catch (e) {
-				await util.sleep(Math.pow(4, i + 1) * millis.perSecond);
+				await util.sleepWithJitter(Math.pow(4, i + 1) * millis.perSecond);
 			}
 		}
 	}
@@ -400,7 +405,7 @@ namespace network {
 		while (true) {
 			updateInternetStatus(config["network-http-test-hosts"]);  // Don't wait
 			updateComputerStatuses(config["network-computer-tests"]);
-			await util.sleep((4.5 + 1 * Math.random()) * millis.perMinute);  // Recheck about every 5 minutes
+			await util.sleepWithJitter(5 * millis.perMinute);
 		}
 	}
 	
