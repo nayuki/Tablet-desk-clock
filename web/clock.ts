@@ -22,7 +22,7 @@ namespace millis {
 
 namespace util {
 	
-	export let configPromise: Promise<XMLHttpRequest> = doXhr("config.json", "json", 60000);
+	export let configPromise: Promise<XMLHttpRequest> = doXhr("config.json", "json", millis.perMinute);
 	
 	
 	export function doXhr(url: string, type: XMLHttpRequestResponseType, timeout: number): Promise<XMLHttpRequest> {
@@ -62,7 +62,7 @@ namespace clock {
 	
 	function main(): void {
 		const d = time.correctedDate();
-		const curUpdate: number = Math.floor(d.getTime() / 1000);
+		const curUpdate: number = Math.floor(d.getTime() / millis.perSecond);
 		if (curUpdate != prevUpdate) {
 			prevUpdate = curUpdate;
 			setText("clock-hour"  , twoDigits(d.getHours  ()));
@@ -75,7 +75,7 @@ namespace clock {
 				twoDigits(d.getUTCDate()) + "-" + DAYS_OF_WEEK[d.getUTCDay()] + EN_SPACE +
 				twoDigits(d.getUTCHours()) + ":" + twoDigits(d.getUTCMinutes()) + EN_SPACE + "UTC");
 		}
-		setTimeout(main, 1000 - time.correctedDate().getTime() % 1000);
+		setTimeout(main, millis.perSecond - time.correctedDate().getTime() % millis.perSecond);
 	}
 	
 	
@@ -120,12 +120,12 @@ namespace time {
 		while (true) {
 			let sleepTime: number;
 			try {  // Update the time correction
-				const remoteTime = (await util.doXhr("/time/" + server.join("/"), "json", 3000)).response;
+				const remoteTime = (await util.doXhr("/time/" + server.join("/"), "json", 3 * millis.perSecond)).response;
 				if (typeof remoteTime != "number")
 					throw "Invalid data";
 				timeCorrection = remoteTime - Date.now();
 				imgElem.style.display = "none";
-				sleepTime = 60 * 60 * 1000;  // An hour
+				sleepTime = millis.perHour;
 				consecutiveFailures = 0;
 			} catch (e) {
 				imgElem.style.removeProperty("display");
@@ -149,7 +149,7 @@ namespace wallpaper {
 	async function main(): Promise<void> {
 		while (true) {
 			try {
-				const url = (await util.doXhr("/wallpaper-daily.json", "json", 10000)).response;
+				const url = (await util.doXhr("/wallpaper-daily.json", "json", 10 * millis.perSecond)).response;
 				if (typeof url != "string")
 					throw "Invalid data";
 				document.documentElement.style.backgroundImage =
@@ -192,9 +192,9 @@ namespace weather {
 			let next = new Date(now.getTime());
 			next.setMinutes(7);
 			next.setSeconds(0);
-			next.setMilliseconds(Math.random() * 3 * 60 * 1000);  // Jitter 3 minutes
-			while (next.getTime() < now.getTime() + 1 * 60 * 1000)
-				next.setTime(next.getTime() + 60 * 60 * 1000);
+			next.setMilliseconds(Math.random() * 3 * millis.perMinute);  // Jitter 3 minutes
+			while (next.getTime() < now.getTime() + 1 * millis.perMinute)
+				next.setTime(next.getTime() + millis.perHour);
 			await util.sleep(next.getTime() - now.getTime());
 		}
 	}
@@ -203,7 +203,7 @@ namespace weather {
 	async function updateWeather(url: string): Promise<void> {
 		if (eraseWeatherTimeout != -1)
 			clearTimeout(eraseWeatherTimeout);
-		eraseWeatherTimeout = setTimeout(eraseWeather, 30000);
+		eraseWeatherTimeout = setTimeout(eraseWeather, 30 * millis.perSecond);
 		
 		for (let i = 0; i < 5; i++) {
 			try {
@@ -212,14 +212,14 @@ namespace weather {
 				eraseWeatherTimeout = -1;
 				break;
 			} catch (e) {
-				await util.sleep(Math.pow(4, i + 1) * 1000);
+				await util.sleep(Math.pow(4, i + 1) * millis.perSecond);
 			}
 		}
 	}
 	
 	
 	async function tryUpdateWeather(url: string): Promise<void> {
-		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(url), "document", 15000);
+		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(url), "document", 15 * millis.perSecond);
 		if (xhr.status != 200)
 			throw "Invalid status";
 		let data = xhr.response;
@@ -274,7 +274,7 @@ namespace daylight {
 	async function main(): Promise<void> {
 		while (true) {
 			update();
-			await util.sleep(60000);
+			await util.sleep(millis.perMinute);
 		}
 	}
 	
@@ -400,7 +400,7 @@ namespace network {
 		while (true) {
 			updateInternetStatus(config["network-http-test-hosts"]);  // Don't wait
 			updateComputerStatuses(config["network-computer-tests"]);
-			await util.sleep((4.5 + 1 * Math.random()) * 60 * 1000);  // Recheck about every 5 minutes
+			await util.sleep((4.5 + 1 * Math.random()) * millis.perMinute);  // Recheck about every 5 minutes
 		}
 	}
 	
@@ -410,7 +410,7 @@ namespace network {
 		for (let i = 0; i < 3; i++) {
 			let host = hosts[Math.floor(Math.random() * hosts.length)];
 			try {
-				let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10000)).response;
+				let alive = (await util.doXhr(`/tcping/${host}/80`, "json", 10 * millis.perSecond)).response;
 				if (typeof alive == "boolean" && alive) {
 					statusNoInternet.style.display = "none";
 					return;
@@ -443,7 +443,7 @@ namespace network {
 		}
 		
 		// Ignore exceptions because the caller isn't waiting
-		let alive = (await util.doXhr(`/tcping/${host}/${port}`, "json", 10000)).response;
+		let alive = (await util.doXhr(`/tcping/${host}/${port}`, "json", 10 * millis.perSecond)).response;
 		if (typeof alive == "boolean" && alive)
 			img.style.removeProperty("display");
 		else
