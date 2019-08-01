@@ -9,6 +9,17 @@
 "use strict";
 
 
+namespace millis {
+	
+	export const perSecond: number = 1000;
+	export const perMinute: number = 60 * perSecond;
+	export const perHour  : number = 60 * perMinute;
+	export const perDay   : number = 24 * perHour;
+	
+}
+
+
+
 namespace util {
 	
 	export let configPromise: Promise<XMLHttpRequest> = doXhr("config.json", "json", 60000);
@@ -275,14 +286,14 @@ namespace daylight {
 		const now = time.correctedDate();
 		const dayStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 0).getTime();
 		const dayEndTime   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
-		let sunriseTime = Math.floor(dayStartTime / MILLIS_PER_DAY) * MILLIS_PER_DAY +
-			weather.sunRiseSet[0] * MILLIS_PER_HOUR + weather.sunRiseSet[1] * MILLIS_PER_MINUTE;
+		let sunriseTime = Math.floor(dayStartTime / millis.perDay) * millis.perDay +
+			weather.sunRiseSet[0] * millis.perHour + weather.sunRiseSet[1] * millis.perMinute;
 		if (sunriseTime < dayStartTime)
-			sunriseTime += MILLIS_PER_DAY;
-		let sunsetTime = Math.floor(sunriseTime / MILLIS_PER_DAY) * MILLIS_PER_DAY +
-			weather.sunRiseSet[2] * MILLIS_PER_HOUR + weather.sunRiseSet[3] * MILLIS_PER_MINUTE;
+			sunriseTime += millis.perDay;
+		let sunsetTime = Math.floor(sunriseTime / millis.perDay) * millis.perDay +
+			weather.sunRiseSet[2] * millis.perHour + weather.sunRiseSet[3] * millis.perMinute;
 		if (sunsetTime < sunriseTime)
-			sunsetTime += MILLIS_PER_DAY;
+			sunsetTime += millis.perDay;
 		
 		const imgWidth = 10000;
 		const imgHeight = 300;
@@ -323,7 +334,7 @@ namespace daylight {
 		}
 		
 		// Draw hour tick marks
-		for (let t = dayStartTime + MILLIS_PER_HOUR; t < dayEndTime; t += MILLIS_PER_HOUR) {
+		for (let t = dayStartTime + millis.perHour; t < dayEndTime; t += millis.perHour) {
 			const x = (t - dayStartTime) * scale;
 			if (new Date(t).getHours() % 6 == 0) {
 				const rectWidth = 70;
@@ -374,11 +385,6 @@ namespace daylight {
 	function setAttr(elem: Element, key: string, val: string|number): void {
 		elem.setAttribute(key, val.toString());
 	}
-	
-	
-	const MILLIS_PER_MINUTE = 60 * 1000;
-	const MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
-	const MILLIS_PER_DAY = 24 * MILLIS_PER_HOUR;
 	
 	
 	main();
