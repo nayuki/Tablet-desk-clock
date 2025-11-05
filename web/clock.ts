@@ -224,7 +224,7 @@ namespace weather {
 	
 	
 	async function tryUpdateWeather(url: string): Promise<void> {
-		const xhr = await util.doXhr("/proxy/" + encodeURIComponent(url), "document", 15 * millis.perSecond);
+		const xhr = await util.doXhr(`/weather/${(await util.configPromise).response["weather-canada"]["province"]}/${(await util.configPromise).response["weather-canada"]["site-id"]}.xml`, "document", 15 * millis.perSecond);
 		if (xhr.status != 200)
 			throw "Invalid status";
 		let data = xhr.response;

@@ -9,6 +9,7 @@
 
 # ---- Prelude ----
 
+import re, urllib.request
 import bottle, main
 
 if __name__ == "__main__":
@@ -49,6 +50,28 @@ def get_time(protocol, host, port):
 		result = rawresult * 1000 // 2**32 - 2208988800000  # Convert to Unix milliseconds
 		return main.json_response(result)
 
+
+
+# ---- Weather ----
+
+@bottle.route("/weather/<province>/<site>.xml")
+def get_weather(province, site):
+	url0 = f"https://dd.weather.gc.ca/today/citypage_weather/{province}/"
+	with urllib.request.urlopen(url0) as inp:
+		data = inp.read()
+	text = data.decode("UTF-8")
+	for hour in reversed(re.findall(r'<a href="(\d{2}/)">\d{2}/</a>', text)):
+		url1 = url0 + hour
+		with urllib.request.urlopen(url1) as inp:
+			data = inp.read()
+		text = data.decode("UTF-8")
+		matches = re.findall(r'<a href="(\d{8}T\d{6}.\d{3}Z_MSC_CitypageWeather_s' + re.escape(site) + r'_en.xml)">', text)
+		if len(matches) > 0:
+			url2 = url1 + max(matches)
+			with urllib.request.urlopen(url2) as inp:
+				data = inp.read()
+			bottle.response.content_type = "application/xml"
+			return data
 
 
 
